@@ -3,6 +3,29 @@ export interface Position {
   y: number
 }
 
+export interface JourneyStage {
+  id: string
+  name: string
+  type: "visit" | "signup" | "trial" | "conversion" | "feature" | "upgrade" | "churn" | "retention"
+  description: string
+  count: number
+  value?: number
+  position: Position
+}
+
+export interface JourneyPath {
+  id: string
+  source: string
+  target: string
+  count: number
+  conversionRate: number
+}
+
+export interface JourneyData {
+  stages: JourneyStage[]
+  paths: JourneyPath[]
+}
+
 export interface ConversionNodeData {
   id: string
   name: string
@@ -53,3 +76,5 @@ export interface EdgeData {
   target: string
   label?: string
 }
+
+export type TimeRange = "all" | "year" | "quarter" | "90days" | "30days" | "7days"

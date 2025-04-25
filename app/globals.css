@@ -104,3 +104,33 @@
 .trend-negative {
   @apply text-red-600;
 }
+
+/* Enhanced table styles */
+.table-row-hover {
+  @apply transition-colors duration-150;
+}
+
+.table-row-hover:hover {
+  @apply bg-gray-50;
+}
+
+/* Category header backgrounds */
+.header-acquisition {
+  @apply bg-gradient-to-r from-blue-500 to-blue-600;
+}
+
+.header-activation {
+  @apply bg-gradient-to-r from-green-500 to-green-600;
+}
+
+.header-retention {
+  @apply bg-gradient-to-r from-purple-500 to-purple-600;
+}
+
+.header-expansion {
+  @apply bg-gradient-to-r from-amber-500 to-amber-600;
+}
+
+.header-all {
+  @apply bg-gradient-to-r from-blue-600 to-indigo-600;
+}

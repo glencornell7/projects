@@ -5,7 +5,7 @@ import { useRouter } from "next/navigation"
 import { ArrowRight, ChevronDown, Filter, MapPin, Plus, Settings } from "lucide-react"
 import { Button } from "@/components/ui/button"
 import { Card, CardContent, CardDescription, CardHeader, CardTitle } from "@/components/ui/card"
-import { Tabs, TabsContent, TabsList, TabsTrigger } from "@/components/ui/tabs"
+import { TabsList, TabsTrigger } from "@/components/ui/tabs"
 import {
   DropdownMenu,
   DropdownMenuContent,
@@ -16,19 +16,20 @@ import {
 } from "@/components/ui/dropdown-menu"
 import { ScrollArea } from "@/components/ui/scroll-area"
 import ConversionGoalCard from "@/components/conversion-goal-card"
-import ConversionGoalCreator from "@/components/conversion-goal-creator"
 import CampaignList from "@/components/campaign-list"
 import OutcomeMetrics from "@/components/outcome-metrics"
 import ConversionGoalIndex from "@/components/conversion-goal-index"
 import ViewSelector from "@/components/view-selector"
 import { conversionGoals, campaigns } from "@/lib/sample-data"
+import ConversionGoalSheet from "@/components/conversion-goal-sheet"
+import JourneyMapView from "@/components/journey-map/journey-map-view"
 
 export default function OutcomesContainer() {
   const router = useRouter()
   const [activeTab, setActiveTab] = useState("goals")
-  const [showCreator, setShowCreator] = useState(false)
+  const [isCreatorOpen, setIsCreatorOpen] = useState(false)
   const [selectedGoal, setSelectedGoal] = useState<string | null>(null)
-  const [viewMode, setViewMode] = useState<"selector" | "dashboard" | "index">("selector")
+  const [viewMode, setViewMode] = useState<"selector" | "dashboard" | "index" | "journey">("selector")
 
   const totalValue = conversionGoals.reduce((sum, goal) => sum + goal.value, 0)
   const totalConversions = conversionGoals.reduce((sum, goal) => sum + goal.conversions, 0)
@@ -43,12 +44,8 @@ export default function OutcomesContainer() {
 
   const selectedGoalData = selectedGoal ? conversionGoals.find((goal) => goal.id === selectedGoal) : null
 
-  const handleViewChange = (view: "dashboard" | "index") => {
+  const handleViewChange = (view: "dashboard" | "index" | "journey") => {
     setViewMode(view)
-  }
-
-  const navigateToJourneyMap = () => {
-    router.push("/journey-map")
   }
 
   if (viewMode === "selector") {
@@ -58,19 +55,20 @@ export default function OutcomesContainer() {
   if (viewMode === "index") {
     return (
       <div>
-        {showCreator ? (
-          <ConversionGoalCreator onClose={() => setShowCreator(false)} />
-        ) : (
-          <ConversionGoalIndex
-            goals={conversionGoals}
-            onGoalSelect={handleGoalSelect}
-            onCreateGoal={() => setShowCreator(true)}
-            onSwitchView={() => setViewMode("dashboard")}
-            onViewJourneyMap={navigateToJourneyMap}
-          />
-        )}
+        <ConversionGoalIndex
+          goals={conversionGoals}
+          onGoalSelect={handleGoalSelect}
+          onCreateGoal={() => setIsCreatorOpen(true)}
+          onSwitchView={() => setViewMode("dashboard")}
+          onViewJourneyMap={() => setViewMode("journey")}
+        />
+        <ConversionGoalSheet open={isCreatorOpen} onOpenChange={setIsCreatorOpen} />
       </div>
     )
+  }
+
+  if (viewMode === "journey") {
+    return <JourneyMapView onSwitchView={() => setViewMode("dashboard")} />
   }
 
   return (
@@ -81,7 +79,7 @@ export default function OutcomesContainer() {
           <Button
             variant="outline"
             className="border-gray-300 text-gray-700 hover:text-gray-900 hover:bg-gray-50"
-            onClick={navigateToJourneyMap}
+            onClick={() => setViewMode("journey")}
           >
             <MapPin className="mr-2 h-4 w-4" />
             Journey Map
@@ -94,7 +92,7 @@ export default function OutcomesContainer() {
             <Settings className="mr-2 h-4 w-4" />
             Switch to Index
           </Button>
-          <Button className="bg-blue-500 hover:bg-blue-600 text-white" onClick={() => setShowCreator(true)}>
+          <Button className="bg-blue-500 hover:bg-blue-600 text-white" onClick={() => setIsCreatorOpen(true)}>
             <Plus className="mr-2 h-4 w-4" />
             New Conversion Goal
           </Button>
@@ -141,97 +139,93 @@ export default function OutcomesContainer() {
         </Card>
       </div>
 
-      {showCreator ? (
-        <ConversionGoalCreator onClose={() => setShowCreator(false)} />
-      ) : (
-        <div className="grid grid-cols-1 gap-6">
-          <Card className="bg-white border-gray-200 shadow-sm">
-            <CardHeader className="border-b border-gray-200 pb-2">
-              <div className="flex justify-between items-center">
-                <div>
-                  <CardTitle className="text-xl text-gray-900">
-                    {selectedGoal ? selectedGoalData?.name || "Selected Goal" : "Conversion Goals"}
-                  </CardTitle>
-                  {selectedGoal && (
-                    <CardDescription className="text-gray-500">Campaigns contributing to this outcome</CardDescription>
-                  )}
-                </div>
-                <div className="flex gap-2">
-                  {selectedGoal && (
-                    <Button
-                      variant="ghost"
-                      className="text-gray-700 hover:text-gray-900 hover:bg-gray-50"
-                      onClick={() => setSelectedGoal(null)}
-                    >
-                      Back to All Goals
-                    </Button>
-                  )}
-                  <Tabs value={activeTab} onValueChange={setActiveTab} className="w-auto">
-                    <TabsList className="bg-gray-100">
-                      <TabsTrigger
-                        value="goals"
-                        className="data-[state=active]:bg-white data-[state=active]:text-blue-600 data-[state=active]:shadow-sm"
-                      >
-                        Goals
-                      </TabsTrigger>
-                      <TabsTrigger
-                        value="campaigns"
-                        className="data-[state=active]:bg-white data-[state=active]:text-blue-600 data-[state=active]:shadow-sm"
-                      >
-                        Campaigns
-                      </TabsTrigger>
-                      <TabsTrigger
-                        value="metrics"
-                        className="data-[state=active]:bg-white data-[state=active]:text-blue-600 data-[state=active]:shadow-sm"
-                      >
-                        Metrics
-                      </TabsTrigger>
-                    </TabsList>
-                    <TabsContent value="goals" className="m-0">
-                      <ScrollArea className="h-[600px]">
-                        <div className="grid grid-cols-1 md:grid-cols-2 lg:grid-cols-3 gap-4 p-6">
-                          {conversionGoals.map((goal) => (
-                            <ConversionGoalCard key={goal.id} goal={goal} onSelect={handleGoalSelect} />
-                          ))}
-                        </div>
-                      </ScrollArea>
-                    </TabsContent>
-                    <TabsContent value="campaigns" className="m-0">
-                      <CampaignList campaigns={filteredCampaigns} goalId={selectedGoal} />
-                    </TabsContent>
-                    <TabsContent value="metrics" className="m-0">
-                      <OutcomeMetrics goalId={selectedGoal} goals={conversionGoals} />
-                    </TabsContent>
-                  </Tabs>
-                  <DropdownMenu>
-                    <DropdownMenuTrigger asChild>
-                      <Button
-                        variant="outline"
-                        className="border-gray-300 text-gray-700 hover:text-gray-900 hover:bg-gray-50"
-                      >
-                        <Filter className="h-4 w-4 mr-2" />
-                        Filter
-                        <ChevronDown className="h-4 w-4 ml-2" />
-                      </Button>
-                    </DropdownMenuTrigger>
-                    <DropdownMenuContent className="bg-white border-gray-200 text-gray-900">
-                      <DropdownMenuLabel>Filter By</DropdownMenuLabel>
-                      <DropdownMenuSeparator className="bg-gray-200" />
-                      <DropdownMenuItem className="focus:bg-gray-100">Highest Value</DropdownMenuItem>
-                      <DropdownMenuItem className="focus:bg-gray-100">Most Conversions</DropdownMenuItem>
-                      <DropdownMenuItem className="focus:bg-gray-100">Recently Created</DropdownMenuItem>
-                      <DropdownMenuItem className="focus:bg-gray-100">Alphabetical</DropdownMenuItem>
-                    </DropdownMenuContent>
-                  </DropdownMenu>
-                </div>
+      <div className="grid grid-cols-1 gap-6">
+        <Card className="bg-white border-gray-200 shadow-sm">
+          <CardHeader className="border-b border-gray-200 pb-2">
+            <div className="flex justify-between items-center">
+              <div>
+                <CardTitle className="text-xl text-gray-900">
+                  {selectedGoal ? selectedGoalData?.name || "Selected Goal" : "Conversion Goals"}
+                </CardTitle>
+                {selectedGoal && (
+                  <CardDescription className="text-gray-500">Campaigns contributing to this outcome</CardDescription>
+                )}
               </div>
-            </CardHeader>
-            <CardContent className="p-0">
-              {/* TabsContent components are now moved inside the Tabs component above */}
-            </CardContent>
-          </Card>
-        </div>
-      )}
+              <div className="flex gap-2">
+                {selectedGoal && (
+                  <Button
+                    variant="ghost"
+                    className="text-gray-700 hover:text-gray-900 hover:bg-gray-50"
+                    onClick={() => setSelectedGoal(null)}
+                  >
+                    Back to All Goals
+                  </Button>
+                )}
+                <TabsList className="bg-gray-100">
+                  <TabsTrigger
+                    value="goals"
+                    className="data-[state=active]:bg-white data-[state=active]:text-blue-600 data-[state=active]:shadow-sm"
+                    onClick={() => setActiveTab("goals")}
+                    data-state={activeTab === "goals" ? "active" : "inactive"}
+                  >
+                    Goals
+                  </TabsTrigger>
+                  <TabsTrigger
+                    value="campaigns"
+                    className="data-[state=active]:bg-white data-[state=active]:text-blue-600 data-[state=active]:shadow-sm"
+                    onClick={() => setActiveTab("campaigns")}
+                    data-state={activeTab === "campaigns" ? "active" : "inactive"}
+                  >
+                    Campaigns
+                  </TabsTrigger>
+                  <TabsTrigger
+                    value="metrics"
+                    className="data-[state=active]:bg-white data-[state=active]:text-blue-600 data-[state=active]:shadow-sm"
+                    onClick={() => setActiveTab("metrics")}
+                    data-state={activeTab === "metrics" ? "active" : "inactive"}
+                  >
+                    Metrics
+                  </TabsTrigger>
+                </TabsList>
+                <DropdownMenu>
+                  <DropdownMenuTrigger asChild>
+                    <Button
+                      variant="outline"
+                      className="border-gray-300 text-gray-700 hover:text-gray-900 hover:bg-gray-50"
+                    >
+                      <Filter className="h-4 w-4 mr-2" />
+                      Filter
+                      <ChevronDown className="h-4 w-4 ml-2" />
+                    </Button>
+                  </DropdownMenuTrigger>
+                  <DropdownMenuContent className="bg-white border-gray-200 text-gray-900">
+                    <DropdownMenuLabel>Filter By</DropdownMenuLabel>
+                    <DropdownMenuSeparator className="bg-gray-200" />
+                    <DropdownMenuItem className="focus:bg-gray-100">Highest Value</DropdownMenuItem>
+                    <DropdownMenuItem className="focus:bg-gray-100">Most Conversions</DropdownMenuItem>
+                    <DropdownMenuItem className="focus:bg-gray-100">Recently Created</DropdownMenuItem>
+                    <DropdownMenuItem className="focus:bg-gray-100">Alphabetical</DropdownMenuItem>
+                  </DropdownMenuContent>
+                </DropdownMenu>
+              </div>
+            </div>
+          </CardHeader>
+          <CardContent className="p-0">
+            {activeTab === "goals" && (
+              <ScrollArea className="h-[600px]">
+                <div className="grid grid-cols-1 md:grid-cols-2 lg:grid-cols-3 gap-4 p-6">
+                  {conversionGoals.map((goal) => (
+                    <ConversionGoalCard key={goal.id} goal={goal} onSelect={handleGoalSelect} />
+                  ))}
+                </div>
+              </ScrollArea>
+            )}
+            {activeTab === "campaigns" && <CampaignList campaigns={filteredCampaigns} goalId={selectedGoal} />}
+            {activeTab === "metrics" && <OutcomeMetrics goalId={selectedGoal} goals={conversionGoals} />}
+          </CardContent>
+        </Card>
+      </div>
+      <ConversionGoalSheet open={isCreatorOpen} onOpenChange={setIsCreatorOpen} />
     </div>
   )
 }
