@@ -5,7 +5,7 @@ import { useRouter } from "next/navigation"
 import { ArrowRight, ChevronDown, Filter, MapPin, Plus, Settings } from "lucide-react"
 import { Button } from "@/components/ui/button"
 import { Card, CardContent, CardDescription, CardHeader, CardTitle } from "@/components/ui/card"
-import { TabsList, TabsTrigger } from "@/components/ui/tabs"
+import { Tabs, TabsList, TabsTrigger } from "@/components/ui/tabs"
 import {
   DropdownMenu,
   DropdownMenuContent,
@@ -161,32 +161,28 @@ export default function OutcomesContainer() {
                     Back to All Goals
                   </Button>
                 )}
-                <TabsList className="bg-gray-100">
-                  <TabsTrigger
-                    value="goals"
-                    className="data-[state=active]:bg-white data-[state=active]:text-blue-600 data-[state=active]:shadow-sm"
-                    onClick={() => setActiveTab("goals")}
-                    data-state={activeTab === "goals" ? "active" : "inactive"}
-                  >
-                    Goals
-                  </TabsTrigger>
-                  <TabsTrigger
-                    value="campaigns"
-                    className="data-[state=active]:bg-white data-[state=active]:text-blue-600 data-[state=active]:shadow-sm"
-                    onClick={() => setActiveTab("campaigns")}
-                    data-state={activeTab === "campaigns" ? "active" : "inactive"}
-                  >
-                    Campaigns
-                  </TabsTrigger>
-                  <TabsTrigger
-                    value="metrics"
-                    className="data-[state=active]:bg-white data-[state=active]:text-blue-600 data-[state=active]:shadow-sm"
-                    onClick={() => setActiveTab("metrics")}
-                    data-state={activeTab === "metrics" ? "active" : "inactive"}
-                  >
-                    Metrics
-                  </TabsTrigger>
-                </TabsList>
+                <Tabs value={activeTab} onValueChange={setActiveTab}>
+                  <TabsList className="bg-gray-100">
+                    <TabsTrigger
+                      value="goals"
+                      className="data-[state=active]:bg-white data-[state=active]:text-blue-600 data-[state=active]:shadow-sm"
+                    >
+                      Goals
+                    </TabsTrigger>
+                    <TabsTrigger
+                      value="campaigns"
+                      className="data-[state=active]:bg-white data-[state=active]:text-blue-600 data-[state=active]:shadow-sm"
+                    >
+                      Campaigns
+                    </TabsTrigger>
+                    <TabsTrigger
+                      value="metrics"
+                      className="data-[state=active]:bg-white data-[state=active]:text-blue-600 data-[state=active]:shadow-sm"
+                    >
+                      Metrics
+                    </TabsTrigger>
+                  </TabsList>
+                </Tabs>
                 <DropdownMenu>
                   <DropdownMenuTrigger asChild>
                     <Button
