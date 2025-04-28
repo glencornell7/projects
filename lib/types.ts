@@ -8,6 +8,7 @@ export interface ConversionGoal {
   target: number
   campaigns: number
   trend: number
+  trendData?: number[] // Array of historical conversion counts
 }
 
 export interface Campaign {

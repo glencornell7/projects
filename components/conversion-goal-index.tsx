@@ -16,8 +16,9 @@ import {
 } from "@/components/ui/dropdown-menu"
 import { Tabs, TabsList, TabsTrigger } from "@/components/ui/tabs"
 import type { ConversionGoal } from "@/lib/types"
-import { campaigns } from "@/lib/sample-data"
+import { campaigns } from "@/lib/sample-data-enhanced"
 import ConversionGoalSheet from "@/components/conversion-goal-sheet"
+import { TrendChart } from "@/components/trend-chart"
 
 interface ConversionGoalIndexProps {
   goals: ConversionGoal[]
@@ -61,16 +62,32 @@ export default function ConversionGoalIndex({
     router.push(`/conversion-goals/${goalId}`)
   }
 
+  // Helper function to get chart colors based on category
+  const getCategoryColors = (category: string) => {
+    switch (category) {
+      case "acquisition":
+        return { line: "#3b82f6", fill: "rgba(59, 130, 246, 0.1)" }
+      case "activation":
+        return { line: "#10b981", fill: "rgba(16, 185, 129, 0.1)" }
+      case "retention":
+        return { line: "#7265dc", fill: "rgba(114, 101, 220, 0.1)" }
+      case "expansion":
+        return { line: "#f59e0b", fill: "rgba(245, 158, 11, 0.1)" }
+      default:
+        return { line: "#7265dc", fill: "rgba(114, 101, 220, 0.1)" }
+    }
+  }
+
   return (
     <div className="min-h-screen bg-gray-50">
       <div className="bg-white border-b border-gray-200 py-8 px-4">
         <div className="container mx-auto max-w-7xl">
           <div className="flex justify-between items-center">
             <div>
-              <h1 className="text-3xl font-bold mb-2 text-gray-900">Conversion Catalog</h1>
+              <h1 className="text-3xl font-bold mb-2 text-gray-900">Goals</h1>
               <p className="text-gray-500">
                 {activeTab === "all"
-                  ? "All conversion goals across your customer journey"
+                  ? "All goals across your customer journey"
                   : `${activeTab.charAt(0).toUpperCase() + activeTab.slice(1)} goals for your customer journey`}
               </p>
             </div>
@@ -91,9 +108,9 @@ export default function ConversionGoalIndex({
                 <Settings className="mr-2 h-4 w-4" />
                 Switch to Dashboard
               </Button>
-              <Button className="bg-blue-500 hover:bg-blue-600 text-white" onClick={() => setIsCreatorOpen(true)}>
+              <Button className="bg-[#7265dc] hover:bg-[#5d4fc7] text-white" onClick={() => setIsCreatorOpen(true)}>
                 <Plus className="mr-2 h-4 w-4" />
-                New Conversion Goal
+                New Goal
               </Button>
             </div>
           </div>
@@ -143,8 +160,8 @@ export default function ConversionGoalIndex({
               <div className="relative flex-1 md:w-64">
                 <Search className="absolute left-2.5 top-2.5 h-4 w-4 text-gray-500" />
                 <Input
-                  placeholder="Search conversion goals..."
-                  className="pl-9 bg-white border-gray-300 text-gray-900 focus-visible:ring-blue-500 w-full"
+                  placeholder="Search goals..."
+                  className="pl-9 bg-white border-gray-300 text-gray-900 focus-visible:ring-[#7265dc] w-full"
                   value={searchQuery}
                   onChange={(e) => setSearchQuery(e.target.value)}
                 />
@@ -174,7 +191,7 @@ export default function ConversionGoalIndex({
 
           <div className="p-4">
             <div className="text-gray-500 text-sm mb-4">
-              {filteredGoals.length} conversion goals {searchQuery ? `matching "${searchQuery}"` : ""}
+              {filteredGoals.length} goals {searchQuery ? `matching "${searchQuery}"` : ""}
             </div>
 
             <div className="overflow-x-auto">
@@ -206,6 +223,9 @@ export default function ConversionGoalIndex({
                       </div>
                     </th>
                     <th className="px-4 py-3 text-gray-500 font-medium text-sm">
+                      <div className="flex items-center cursor-pointer hover:text-gray-900">Trend (12 months)</div>
+                    </th>
+                    <th className="px-4 py-3 text-gray-500 font-medium text-sm">
                       <div className="flex items-center cursor-pointer hover:text-gray-900">
                         Progress
                         <ArrowUpDown className="ml-1 h-4 w-4" />
@@ -223,6 +243,7 @@ export default function ConversionGoalIndex({
                   {filteredGoals.map((goal) => {
                     const progress = Math.min(Math.round((goal.conversions / goal.target) * 100), 100)
                     const relatedCampaigns = campaigns.filter((campaign) => campaign.goalIds.includes(goal.id))
+                    const chartColors = getCategoryColors(goal.category)
 
                     return (
                       <tr
@@ -242,12 +263,12 @@ export default function ConversionGoalIndex({
                           <Badge
                             className={`font-normal ${
                               goal.category === "acquisition"
-                                ? "category-acquisition"
+                                ? "bg-blue-100 text-blue-800 hover:bg-blue-200"
                                 : goal.category === "activation"
-                                  ? "category-activation"
+                                  ? "bg-green-100 text-green-800 hover:bg-green-200"
                                   : goal.category === "retention"
-                                    ? "category-retention"
-                                    : "category-expansion"
+                                    ? "bg-purple-100 text-purple-800 hover:bg-purple-200"
+                                    : "bg-amber-100 text-amber-800 hover:bg-amber-200"
                             }`}
                           >
                             {goal.category.charAt(0).toUpperCase() + goal.category.slice(1)}
@@ -255,7 +276,7 @@ export default function ConversionGoalIndex({
                         </td>
                         <td className="px-4 py-3">
                           <div className="font-medium text-gray-900">${goal.value.toLocaleString()}</div>
-                          <div className={`text-xs ${goal.trend >= 0 ? "trend-positive" : "trend-negative"}`}>
+                          <div className={`text-xs ${goal.trend >= 0 ? "text-green-600" : "text-red-600"}`}>
                             {goal.trend >= 0 ? "+" : ""}
                             {goal.trend}%
                           </div>
@@ -265,17 +286,31 @@ export default function ConversionGoalIndex({
                           <div className="text-gray-500 text-xs">Target: {goal.target.toLocaleString()}</div>
                         </td>
                         <td className="px-4 py-3">
+                          {goal.trendData ? (
+                            <TrendChart
+                              data={goal.trendData}
+                              height={40}
+                              width={120}
+                              lineColor={chartColors.line}
+                              fillColor={chartColors.fill}
+                              className="mx-auto"
+                            />
+                          ) : (
+                            <div className="h-10 w-30 bg-gray-100 rounded animate-pulse"></div>
+                          )}
+                        </td>
+                        <td className="px-4 py-3">
                           <div className="flex items-center">
                             <div className="w-full max-w-[100px] bg-gray-200 h-2 rounded-full mr-3">
                               <div
                                 className={`h-full rounded-full ${
                                   goal.category === "acquisition"
-                                    ? "progress-acquisition"
+                                    ? "bg-blue-500"
                                     : goal.category === "activation"
-                                      ? "progress-activation"
+                                      ? "bg-green-500"
                                       : goal.category === "retention"
-                                        ? "progress-retention"
-                                        : "progress-expansion"
+                                        ? "bg-purple-500"
+                                        : "bg-amber-500"
                                 }`}
                                 style={{ width: `${progress}%` }}
                               ></div>

@@ -1,7 +1,7 @@
 "use client"
 
 import { useState } from "react"
-import { ChevronDown, Filter } from "lucide-react"
+import { ChevronDown, Filter, BarChart2 } from "lucide-react"
 import { Button } from "@/components/ui/button"
 import { Switch } from "@/components/ui/switch"
 import { Label } from "@/components/ui/label"
@@ -15,6 +15,7 @@ import {
 } from "@/components/ui/dropdown-menu"
 import { Dialog, DialogContent, DialogHeader, DialogTitle, DialogDescription } from "@/components/ui/dialog"
 import JourneyCanvas from "./journey-canvas-enhanced"
+import FunnelView from "./funnel-view"
 import { sampleJourneyData } from "./sample-journey-data"
 import { campaigns } from "@/lib/sample-data"
 import type { TimeRange, JourneyStage } from "./journey-types"
@@ -28,10 +29,24 @@ export default function JourneyMapEmbed() {
   const [minNodeSize, setMinNodeSize] = useState(60)
   const [selectedNode, setSelectedNode] = useState<JourneyStage | null>(null)
   const [isNodeDetailsOpen, setIsNodeDetailsOpen] = useState(false)
+  const [activeView, setActiveView] = useState("journey")
+  const [isAnimating, setIsAnimating] = useState(false)
 
   const handleNodeClick = (node: JourneyStage) => {
     setSelectedNode(node)
     setIsNodeDetailsOpen(true)
+  }
+
+  const handleViewChange = (view: string) => {
+    if (view !== activeView) {
+      setIsAnimating(true)
+      setTimeout(() => {
+        setActiveView(view)
+        setTimeout(() => {
+          setIsAnimating(false)
+        }, 100)
+      }, 300)
+    }
   }
 
   // Find associated campaigns for the selected node
@@ -76,6 +91,14 @@ export default function JourneyMapEmbed() {
               className="data-[state=checked]:bg-blue-600"
             />
           </div>
+          <Button
+            variant="outline"
+            className="border-gray-300 text-gray-700 hover:text-gray-900 hover:bg-gray-50"
+            onClick={() => handleViewChange(activeView === "journey" ? "funnel" : "journey")}
+          >
+            <BarChart2 className="h-4 w-4 mr-2" />
+            {activeView === "journey" ? "Funnel View" : "Journey View"}
+          </Button>
           <DropdownMenu>
             <DropdownMenuTrigger asChild>
               <Button variant="outline" className="border-gray-300 text-gray-700 hover:text-gray-900 hover:bg-gray-50">
@@ -111,16 +134,22 @@ export default function JourneyMapEmbed() {
       </div>
 
       <div className="flex-1 relative">
-        <div className="absolute inset-0">
-          <JourneyCanvas
-            journeyData={sampleJourneyData}
-            zoom={zoom}
-            showPaths={showPaths}
-            showAssociatedContent={showAssociatedContent}
-            timeRange={timeRange}
-            minNodeSize={minNodeSize}
-            onNodeClick={handleNodeClick}
-          />
+        <div
+          className={`absolute inset-0 transition-opacity duration-300 ${isAnimating ? "opacity-0" : "opacity-100"}`}
+        >
+          {activeView === "journey" ? (
+            <JourneyCanvas
+              journeyData={sampleJourneyData}
+              zoom={zoom}
+              showPaths={showPaths}
+              showAssociatedContent={showAssociatedContent}
+              timeRange={timeRange}
+              minNodeSize={minNodeSize}
+              onNodeClick={handleNodeClick}
+            />
+          ) : (
+            <FunnelView journeyData={sampleJourneyData} timeRange={timeRange} onStageClick={handleNodeClick} />
+          )}
         </div>
       </div>
 

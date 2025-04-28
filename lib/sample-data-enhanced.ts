@@ -1,0 +1,230 @@
+import type { ConversionGoal, Campaign } from "./types"
+
+// Helper function to generate realistic trend data
+function generateTrendData(baseValue: number, volatility: number, trend: number, points = 12): number[] {
+  const data: number[] = []
+  let currentValue = baseValue - (baseValue * trend * points) / 200 // Start lower/higher based on trend
+
+  for (let i = 0; i < points; i++) {
+    // Add some randomness but follow the overall trend
+    const randomFactor = (Math.random() - 0.5) * volatility
+    currentValue = currentValue * (1 + trend / 100 / points + randomFactor)
+    data.push(Math.round(currentValue))
+  }
+
+  return data
+}
+
+export const conversionGoals: ConversionGoal[] = [
+  {
+    id: "goal1",
+    name: "Free Trial to Paid Conversion",
+    description: "Users who convert from a free trial to a paid subscription",
+    category: "activation",
+    value: 99000,
+    conversions: 990,
+    target: 1200,
+    campaigns: 5,
+    trend: 12.5,
+    trendData: generateTrendData(75, 0.05, 12.5, 12), // Monthly data for a year
+  },
+  {
+    id: "goal2",
+    name: "Basic to Premium Upgrade",
+    description: "Existing customers who upgrade from basic to premium plan",
+    category: "expansion",
+    value: 49500,
+    conversions: 330,
+    target: 500,
+    campaigns: 3,
+    trend: 8.3,
+    trendData: generateTrendData(25, 0.08, 8.3, 12),
+  },
+  {
+    id: "goal3",
+    name: "Churn Prevention",
+    description: "At-risk customers who renew their subscription",
+    category: "retention",
+    value: 74250,
+    conversions: 495,
+    target: 600,
+    campaigns: 4,
+    trend: -2.1,
+    trendData: generateTrendData(45, 0.04, -2.1, 12),
+  },
+  {
+    id: "goal4",
+    name: "New User Signup",
+    description: "New users who complete the signup process",
+    category: "acquisition",
+    value: 25000,
+    conversions: 2500,
+    target: 3000,
+    campaigns: 6,
+    trend: 15.7,
+    trendData: generateTrendData(200, 0.1, 15.7, 12),
+  },
+  {
+    id: "goal5",
+    name: "Feature Activation",
+    description: "Users who activate a key product feature",
+    category: "activation",
+    value: 15000,
+    conversions: 1500,
+    target: 2000,
+    campaigns: 3,
+    trend: 5.2,
+    trendData: generateTrendData(120, 0.06, 5.2, 12),
+  },
+  {
+    id: "goal6",
+    name: "Annual Plan Conversion",
+    description: "Monthly subscribers who switch to annual billing",
+    category: "expansion",
+    value: 36000,
+    conversions: 240,
+    target: 300,
+    campaigns: 2,
+    trend: 9.8,
+    trendData: generateTrendData(18, 0.07, 9.8, 12),
+  },
+]
+
+export const campaigns: Campaign[] = [
+  {
+    id: "camp1",
+    name: "Welcome Series",
+    status: "active",
+    channel: "email",
+    audience: "New Signups",
+    created: "2023-05-15",
+    modified: "2023-06-02",
+    goalIds: ["goal1", "goal4", "goal5"],
+    conversions: 450,
+    value: 44550,
+    metrics: {
+      sent: 10000,
+      opened: 4500,
+      clicked: 2200,
+    },
+  },
+  {
+    id: "camp2",
+    name: "Trial Ending Reminder",
+    status: "active",
+    channel: "email",
+    audience: "Trial Users (Day 12-14)",
+    created: "2023-04-20",
+    modified: "2023-05-18",
+    goalIds: ["goal1"],
+    conversions: 320,
+    value: 31680,
+    metrics: {
+      sent: 5000,
+      opened: 3200,
+      clicked: 1800,
+    },
+  },
+  {
+    id: "camp3",
+    name: "Premium Features Showcase",
+    status: "active",
+    channel: "in-app",
+    audience: "Basic Plan Users (>30 days)",
+    created: "2023-03-10",
+    modified: "2023-04-05",
+    goalIds: ["goal2"],
+    conversions: 180,
+    value: 27000,
+    metrics: {
+      sent: 8000,
+      opened: 6400,
+      clicked: 2100,
+    },
+  },
+  {
+    id: "camp4",
+    name: "Renewal Discount Offer",
+    status: "active",
+    channel: "email",
+    audience: "Expiring Subscriptions (7 days)",
+    created: "2023-02-28",
+    modified: "2023-03-15",
+    goalIds: ["goal3"],
+    conversions: 210,
+    value: 31500,
+    metrics: {
+      sent: 3000,
+      opened: 1800,
+      clicked: 900,
+    },
+  },
+  {
+    id: "camp5",
+    name: "Feature Tutorial Series",
+    status: "active",
+    channel: "email",
+    audience: "New Users (<14 days)",
+    created: "2023-06-01",
+    modified: "2023-06-01",
+    goalIds: ["goal5"],
+    conversions: 580,
+    value: 5800,
+    metrics: {
+      sent: 12000,
+      opened: 5400,
+      clicked: 3100,
+    },
+  },
+  {
+    id: "camp6",
+    name: "Annual Plan Savings",
+    status: "draft",
+    channel: "email",
+    audience: "Monthly Subscribers (>90 days)",
+    created: "2023-06-10",
+    modified: "2023-06-10",
+    goalIds: ["goal6"],
+    conversions: 0,
+    value: 0,
+    metrics: {
+      sent: 0,
+      opened: 0,
+      clicked: 0,
+    },
+  },
+  {
+    id: "camp7",
+    name: "Re-engagement Campaign",
+    status: "active",
+    channel: "push",
+    audience: "Inactive Users (>30 days)",
+    created: "2023-05-05",
+    modified: "2023-05-20",
+    goalIds: ["goal3", "goal5"],
+    conversions: 190,
+    value: 28500,
+    metrics: {
+      sent: 15000,
+      opened: 4200,
+      clicked: 1100,
+    },
+  },
+  {
+    id: "camp8",
+    name: "Limited Time Offer",
+    status: "paused",
+    channel: "sms",
+    audience: "All Active Users",
+    created: "2023-04-15",
+    modified: "2023-05-01",
+    goalIds: ["goal2", "goal6"],
+    conversions: 150,
+    value: 22500,
+    metrics: {
+      sent: 20000,
+      opened: 18000,
+      clicked: 3500,
+    },
+  },
+]

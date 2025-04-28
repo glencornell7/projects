@@ -1,12 +1,15 @@
 "use client"
 
+import { useRouter } from "next/navigation"
 import { Card, CardContent } from "@/components/ui/card"
 
-interface ViewSelectorProps {
-  onViewChange: (view: "dashboard" | "index" | "journey") => void
-}
+export default function ViewSelector() {
+  const router = useRouter()
 
-export default function ViewSelector({ onViewChange }: ViewSelectorProps) {
+  const navigateTo = (path: string) => {
+    router.push(path)
+  }
+
   return (
     <div className="container mx-auto py-12 px-4 max-w-5xl">
       <h1 className="text-2xl font-semibold text-gray-900 text-center mb-6">Choose a View</h1>
@@ -17,7 +20,7 @@ export default function ViewSelector({ onViewChange }: ViewSelectorProps) {
       <div className="grid grid-cols-1 md:grid-cols-3 gap-6 max-w-5xl mx-auto">
         <Card
           className="border hover:border-blue-500 transition-all cursor-pointer shadow-sm"
-          onClick={() => onViewChange("dashboard")}
+          onClick={() => navigateTo("/dashboard")}
         >
           <CardContent className="p-6 flex flex-col items-center text-center">
             <div className="h-48 w-full bg-gray-100 rounded-md mb-4 flex items-center justify-center relative overflow-hidden">
@@ -37,7 +40,7 @@ export default function ViewSelector({ onViewChange }: ViewSelectorProps) {
 
         <Card
           className="border hover:border-blue-500 transition-all cursor-pointer shadow-sm"
-          onClick={() => onViewChange("index")}
+          onClick={() => navigateTo("/goals")}
         >
           <CardContent className="p-6 flex flex-col items-center text-center">
             <div className="h-48 w-full bg-gray-100 rounded-md mb-4 flex items-center justify-center relative overflow-hidden">
@@ -50,14 +53,14 @@ export default function ViewSelector({ onViewChange }: ViewSelectorProps) {
                 </div>
               </div>
             </div>
-            <h3 className="text-lg font-medium text-gray-900 mb-2">Index View</h3>
-            <p className="text-gray-600">Browse conversion goals in a structured table with detailed information</p>
+            <h3 className="text-lg font-medium text-gray-900 mb-2">Goals View</h3>
+            <p className="text-gray-600">Browse goals in a structured table with detailed information</p>
           </CardContent>
         </Card>
 
         <Card
           className="border hover:border-blue-500 transition-all cursor-pointer shadow-sm"
-          onClick={() => onViewChange("journey")}
+          onClick={() => navigateTo("/journey-map")}
         >
           <CardContent className="p-6 flex flex-col items-center text-center">
             <div className="h-48 w-full bg-gray-100 rounded-md mb-4 flex items-center justify-center relative overflow-hidden">

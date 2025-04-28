@@ -1,11 +1,12 @@
 "use client"
 
-import JourneyMapView from "@/components/journey-map/journey-map-view"
+import { conversionGoals } from "@/lib/sample-data-enhanced"
+import OutcomesContainer from "@/components/outcomes-container"
 import { Button } from "@/components/ui/button"
 import { ArrowLeft } from "lucide-react"
 import { useRouter } from "next/navigation"
 
-export default function JourneyMapPage() {
+export default function DashboardPage() {
   const router = useRouter()
 
   return (
@@ -16,7 +17,11 @@ export default function JourneyMapPage() {
           Back to Navigation
         </Button>
       </div>
-      <JourneyMapView onSwitchView={() => router.push("/goals")} />
+      <OutcomesContainer
+        goals={conversionGoals}
+        onSwitchView={() => router.push("/goals")}
+        onViewJourneyMap={() => router.push("/journey-map")}
+      />
     </main>
   )
 }

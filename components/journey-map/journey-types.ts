@@ -78,3 +78,20 @@ export interface EdgeData {
 }
 
 export type TimeRange = "all" | "year" | "quarter" | "90days" | "30days" | "7days"
+
+export interface HealthDistribution {
+  healthy: number
+  churnRisk: number
+  opportunity: number
+}
+
+export interface LifecycleStage {
+  id: string
+  label: string
+  count: number
+  growth: number
+  direction: "up" | "down" | "none"
+  color: string
+  description: string
+  healthDistribution: HealthDistribution
+}
