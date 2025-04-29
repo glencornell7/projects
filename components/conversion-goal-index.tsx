@@ -2,6 +2,7 @@
 
 import { useState } from "react"
 import { useRouter } from "next/navigation"
+import Link from "next/link"
 import { ArrowUpDown, ChevronDown, Filter, MapPin, Plus, Search, Settings } from "lucide-react"
 import { Button } from "@/components/ui/button"
 import { Input } from "@/components/ui/input"
@@ -84,33 +85,35 @@ export default function ConversionGoalIndex({
         <div className="container mx-auto max-w-7xl">
           <div className="flex justify-between items-center">
             <div>
-              <h1 className="text-3xl font-bold mb-2 text-gray-900">Goals</h1>
+              <h1 className="text-3xl font-bold mb-2 text-gray-900">Conversions</h1>
               <p className="text-gray-500">
                 {activeTab === "all"
-                  ? "All goals across your customer journey"
-                  : `${activeTab.charAt(0).toUpperCase() + activeTab.slice(1)} goals for your customer journey`}
+                  ? "All conversions across your customer journey"
+                  : `${activeTab.charAt(0).toUpperCase() + activeTab.slice(1)} conversions for your customer journey`}
               </p>
             </div>
             <div className="flex gap-3">
-              <Button
-                variant="outline"
-                className="border-gray-300 text-gray-700 hover:text-gray-900 hover:bg-gray-50"
-                onClick={onViewJourneyMap}
-              >
-                <MapPin className="mr-2 h-4 w-4" />
-                Journey Map
-              </Button>
-              <Button
-                variant="outline"
-                className="border-gray-300 text-gray-700 hover:text-gray-900 hover:bg-gray-50"
-                onClick={onSwitchView}
-              >
-                <Settings className="mr-2 h-4 w-4" />
-                Switch to Dashboard
-              </Button>
+              <Link href="/journey-map">
+                <Button
+                  variant="outline"
+                  className="border-gray-300 text-gray-700 hover:text-gray-900 hover:bg-gray-50"
+                >
+                  <MapPin className="mr-2 h-4 w-4" />
+                  Journey Map
+                </Button>
+              </Link>
+              <Link href="/dashboard">
+                <Button
+                  variant="outline"
+                  className="border-gray-300 text-gray-700 hover:text-gray-900 hover:bg-gray-50"
+                >
+                  <Settings className="mr-2 h-4 w-4" />
+                  Switch to Dashboard
+                </Button>
+              </Link>
               <Button className="bg-[#7265dc] hover:bg-[#5d4fc7] text-white" onClick={() => setIsCreatorOpen(true)}>
                 <Plus className="mr-2 h-4 w-4" />
-                New Goal
+                New Conversion
               </Button>
             </div>
           </div>
@@ -160,7 +163,7 @@ export default function ConversionGoalIndex({
               <div className="relative flex-1 md:w-64">
                 <Search className="absolute left-2.5 top-2.5 h-4 w-4 text-gray-500" />
                 <Input
-                  placeholder="Search goals..."
+                  placeholder="Search conversions..."
                   className="pl-9 bg-white border-gray-300 text-gray-900 focus-visible:ring-[#7265dc] w-full"
                   value={searchQuery}
                   onChange={(e) => setSearchQuery(e.target.value)}
@@ -191,7 +194,7 @@ export default function ConversionGoalIndex({
 
           <div className="p-4">
             <div className="text-gray-500 text-sm mb-4">
-              {filteredGoals.length} goals {searchQuery ? `matching "${searchQuery}"` : ""}
+              {filteredGoals.length} conversions {searchQuery ? `matching "${searchQuery}"` : ""}
             </div>
 
             <div className="overflow-x-auto">

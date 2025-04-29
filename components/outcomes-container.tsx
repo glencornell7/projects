@@ -1,8 +1,7 @@
 "use client"
 
 import { useState } from "react"
-import { useRouter } from "next/navigation"
-import { ArrowRight, ChevronDown, Filter, MapPin, Plus, Settings } from "lucide-react"
+import { ArrowRight, ChevronDown, Filter, Plus } from "lucide-react"
 import { Button } from "@/components/ui/button"
 import { Card, CardContent, CardDescription, CardHeader, CardTitle } from "@/components/ui/card"
 import { Tabs, TabsList, TabsTrigger } from "@/components/ui/tabs"
@@ -18,18 +17,15 @@ import { ScrollArea } from "@/components/ui/scroll-area"
 import ConversionGoalCard from "@/components/conversion-goal-card"
 import CampaignList from "@/components/campaign-list"
 import OutcomeMetrics from "@/components/outcome-metrics"
-import ConversionGoalIndex from "@/components/conversion-goal-index"
-import ViewSelector from "@/components/view-selector"
 import { conversionGoals, campaigns } from "@/lib/sample-data"
 import ConversionGoalSheet from "@/components/conversion-goal-sheet"
-import JourneyMapView from "@/components/journey-map/journey-map-view"
+import { useRouter } from "next/navigation"
 
 export default function OutcomesContainer() {
   const router = useRouter()
   const [activeTab, setActiveTab] = useState("goals")
   const [isCreatorOpen, setIsCreatorOpen] = useState(false)
   const [selectedGoal, setSelectedGoal] = useState<string | null>(null)
-  const [viewMode, setViewMode] = useState<"selector" | "dashboard" | "index" | "journey">("selector")
 
   const totalValue = conversionGoals.reduce((sum, goal) => sum + goal.value, 0)
   const totalConversions = conversionGoals.reduce((sum, goal) => sum + goal.conversions, 0)
@@ -44,61 +40,8 @@ export default function OutcomesContainer() {
 
   const selectedGoalData = selectedGoal ? conversionGoals.find((goal) => goal.id === selectedGoal) : null
 
-  const handleViewChange = (view: "dashboard" | "index" | "journey") => {
-    setViewMode(view)
-  }
-
-  if (viewMode === "selector") {
-    return <ViewSelector onViewChange={handleViewChange} />
-  }
-
-  if (viewMode === "index") {
-    return (
-      <div>
-        <ConversionGoalIndex
-          goals={conversionGoals}
-          onGoalSelect={handleGoalSelect}
-          onCreateGoal={() => setIsCreatorOpen(true)}
-          onSwitchView={() => setViewMode("dashboard")}
-          onViewJourneyMap={() => setViewMode("journey")}
-        />
-        <ConversionGoalSheet open={isCreatorOpen} onOpenChange={setIsCreatorOpen} />
-      </div>
-    )
-  }
-
-  if (viewMode === "journey") {
-    return <JourneyMapView onSwitchView={() => setViewMode("dashboard")} />
-  }
-
   return (
-    <div className="container mx-auto py-6 px-4 max-w-7xl">
-      <div className="flex justify-between items-center mb-6">
-        <h1 className="text-2xl font-semibold text-gray-900">Outcomes Dashboard</h1>
-        <div className="flex gap-3">
-          <Button
-            variant="outline"
-            className="border-gray-300 text-gray-700 hover:text-gray-900 hover:bg-gray-50"
-            onClick={() => setViewMode("journey")}
-          >
-            <MapPin className="mr-2 h-4 w-4" />
-            Journey Map
-          </Button>
-          <Button
-            variant="outline"
-            className="border-gray-300 text-gray-700 hover:text-gray-900 hover:bg-gray-50"
-            onClick={() => setViewMode("index")}
-          >
-            <Settings className="mr-2 h-4 w-4" />
-            Switch to Index
-          </Button>
-          <Button className="bg-blue-500 hover:bg-blue-600 text-white" onClick={() => setIsCreatorOpen(true)}>
-            <Plus className="mr-2 h-4 w-4" />
-            New Conversion Goal
-          </Button>
-        </div>
-      </div>
-
+    <>
       <div className="grid grid-cols-1 lg:grid-cols-3 gap-6 mb-8">
         <Card className="bg-white border-gray-200 shadow-sm">
           <CardHeader className="pb-2">
@@ -203,6 +146,10 @@ export default function OutcomesContainer() {
                     <DropdownMenuItem className="focus:bg-gray-100">Alphabetical</DropdownMenuItem>
                   </DropdownMenuContent>
                 </DropdownMenu>
+                <Button className="bg-blue-500 hover:bg-blue-600 text-white" onClick={() => setIsCreatorOpen(true)}>
+                  <Plus className="mr-2 h-4 w-4" />
+                  New Goal
+                </Button>
               </div>
             </div>
           </CardHeader>
@@ -222,6 +169,6 @@ export default function OutcomesContainer() {
         </Card>
       </div>
       <ConversionGoalSheet open={isCreatorOpen} onOpenChange={setIsCreatorOpen} />
-    </div>
+    </>
   )
 }

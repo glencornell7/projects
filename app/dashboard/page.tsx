@@ -1,27 +1,26 @@
-"use client"
-
-import { conversionGoals } from "@/lib/sample-data-enhanced"
-import OutcomesContainer from "@/components/outcomes-container"
 import { Button } from "@/components/ui/button"
 import { ArrowLeft } from "lucide-react"
-import { useRouter } from "next/navigation"
+import Link from "next/link"
+import OutcomesContainer from "@/components/outcomes-container"
+import type { Metadata } from "next"
+
+export const metadata: Metadata = {
+  title: "Dashboard | Customer.io",
+  description: "Visualize conversion goals with cards and metrics in a dashboard layout",
+}
 
 export default function DashboardPage() {
-  const router = useRouter()
-
   return (
     <main className="min-h-screen bg-gray-50">
       <div className="container mx-auto pt-4">
-        <Button variant="ghost" className="mb-4 flex items-center gap-1" onClick={() => router.push("/")}>
-          <ArrowLeft className="h-4 w-4" />
-          Back to Navigation
-        </Button>
+        <Link href="/">
+          <Button variant="ghost" className="mb-4 flex items-center gap-1">
+            <ArrowLeft className="h-4 w-4" />
+            Back to Navigation
+          </Button>
+        </Link>
       </div>
-      <OutcomesContainer
-        goals={conversionGoals}
-        onSwitchView={() => router.push("/goals")}
-        onViewJourneyMap={() => router.push("/journey-map")}
-      />
+      <OutcomesContainer />
     </main>
   )
 }
