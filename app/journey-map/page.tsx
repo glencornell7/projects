@@ -1,15 +1,14 @@
+"use client"
+
 import JourneyMapView from "@/components/journey-map/journey-map-view"
 import { Button } from "@/components/ui/button"
 import { ArrowLeft } from "lucide-react"
 import Link from "next/link"
-import type { Metadata } from "next"
-
-export const metadata: Metadata = {
-  title: "Journey Map | Customer.io",
-  description: "Visualize customer paths and conversion flows in an interactive journey map",
-}
+import { useRouter } from "next/navigation"
 
 export default function JourneyMapPage() {
+  const router = useRouter()
+
   return (
     <main className="min-h-screen bg-gray-50">
       <div className="container mx-auto pt-4">
@@ -20,7 +19,7 @@ export default function JourneyMapPage() {
           </Button>
         </Link>
       </div>
-      <JourneyMapView />
+      <JourneyMapView onSwitchView={() => router.push("/dashboard")} />
     </main>
   )
 }

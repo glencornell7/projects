@@ -24,8 +24,9 @@ import type { JourneyData, JourneyStage } from "./journey-types"
 
 interface MergedFunnelViewProps {
   journeyData: JourneyData
-  timeRange: string
+  timeRange?: string
   onStageClick?: (stage: JourneyStage) => void
+  showFunnelLines?: boolean
 }
 
 // Define the lifecycle stages with more detailed data
@@ -175,7 +176,12 @@ const summaryMetrics = [
   { id: "nps", label: "NPS score", value: "68", change: "+1.2%", direction: "up" },
 ]
 
-export default function MergedFunnelView({ journeyData, timeRange, onStageClick }: MergedFunnelViewProps) {
+export default function MergedFunnelView({
+  journeyData,
+  timeRange = "90days",
+  onStageClick,
+  showFunnelLines = true,
+}: MergedFunnelViewProps) {
   const [isVisible, setIsVisible] = useState(false)
   const [viewType, setViewType] = useState<"people" | "accounts">("people")
   const [hoveredStage, setHoveredStage] = useState<string | null>(null)
@@ -186,7 +192,6 @@ export default function MergedFunnelView({ journeyData, timeRange, onStageClick 
   const [isConversionDetailsOpen, setIsConversionDetailsOpen] = useState(false)
   const [zoom, setZoom] = useState(1)
   const [isFullscreen, setIsFullscreen] = useState(false)
-  const [showFunnelLines, setShowFunnelLines] = useState(true)
   const containerRef = useRef<HTMLDivElement>(null)
 
   // In a real implementation, we would process the journey data here
@@ -273,7 +278,7 @@ export default function MergedFunnelView({ journeyData, timeRange, onStageClick 
         {/* Summary metrics */}
         <div className="grid grid-cols-4 gap-4 mb-8">
           {summaryMetrics.map((metric) => (
-            <Card key={metric.id} className="bg-gray-50 border border-gray-200">
+            <Card key={metric.id} className="bg-gray-50 border-gray-200">
               <CardContent className="p-4">
                 <div className="flex justify-between items-start">
                   <div className="text-sm text-gray-500">{metric.label}</div>
@@ -317,12 +322,7 @@ export default function MergedFunnelView({ journeyData, timeRange, onStageClick 
                 <span className="text-sm text-gray-600">Opportunity</span>
               </div>
               <div className="flex items-center gap-4">
-                <Button
-                  variant="outline"
-                  size="sm"
-                  className="text-xs"
-                  onClick={() => setShowFunnelLines(!showFunnelLines)}
-                >
+                <Button variant="outline" size="sm" className="text-xs" onClick={() => showFunnelLines}>
                   {showFunnelLines ? "Hide Funnel Lines" : "Show Funnel Lines"}
                 </Button>
                 <Tabs defaultValue="people" onValueChange={(value) => setViewType(value as "people" | "accounts")}>
