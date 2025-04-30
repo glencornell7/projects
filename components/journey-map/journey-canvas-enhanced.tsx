@@ -33,6 +33,7 @@ export default function JourneyCanvas({
   const [stages, setStages] = useState<JourneyStage[]>(journeyData.stages)
   const canvasRef = useRef<HTMLDivElement>(null)
   const [canvasSize, setCanvasSize] = useState({ width: 3000, height: 2000 })
+  const [hasMoved, setHasMoved] = useState(false)
 
   // Apply time range filter to the data
   useEffect(() => {
@@ -62,14 +63,18 @@ export default function JourneyCanvas({
 
     setIsDragging(true)
     setDraggedNodeId(nodeId)
+    setHasMoved(false) // Reset the moved state when starting to drag
 
     const node = stages.find((n) => n.id === nodeId)
-    if (node) {
-      const rect = (e.target as HTMLElement).getBoundingClientRect()
-      setOffset({
-        x: e.clientX - rect.left,
-        y: e.clientY - rect.top,
-      })
+    if (node && canvasRef.current) {
+      // Get canvas position
+      const canvasRect = canvasRef.current.getBoundingClientRect()
+
+      // Calculate the offset considering the zoom level and node position
+      const offsetX = (e.clientX - canvasRect.left) / zoom - node.position.x
+      const offsetY = (e.clientY - canvasRect.top) / zoom - node.position.y
+
+      setOffset({ x: offsetX, y: offsetY })
     }
 
     e.stopPropagation()
@@ -79,23 +84,24 @@ export default function JourneyCanvas({
     if (!isDragging || !draggedNodeId || !canvasRef.current) return
 
     const canvasRect = canvasRef.current.getBoundingClientRect()
-    const x = (e.clientX - canvasRect.left - offset.x) / zoom
-    const y = (e.clientY - canvasRect.top - offset.y) / zoom
+
+    // Calculate the new position considering the zoom level and offset
+    const newX = (e.clientX - canvasRect.left) / zoom - offset.x
+    const newY = (e.clientY - canvasRect.top) / zoom - offset.y
+
+    // Set hasMoved to true since we're actually moving the node
+    setHasMoved(true)
 
     setStages((prevStages) =>
-      prevStages.map((stage) => (stage.id === draggedNodeId ? { ...stage, position: { x, y } } : stage)),
+      prevStages.map((stage) => (stage.id === draggedNodeId ? { ...stage, position: { x: newX, y: newY } } : stage)),
     )
   }
 
-  const handleMouseUp = () => {
-    setIsDragging(false)
-    setDraggedNodeId(null)
-  }
-
-  const handleNodeClick = (e: React.MouseEvent, node: JourneyStage) => {
-    e.stopPropagation()
-    if (onNodeClick) {
-      onNodeClick(node)
+  const handleMouseUp = (e: React.MouseEvent) => {
+    if (isDragging) {
+      e.stopPropagation()
+      setIsDragging(false)
+      setDraggedNodeId(null)
     }
   }
 
@@ -343,9 +349,15 @@ export default function JourneyCanvas({
                 height: nodeSize,
               }}
               onMouseDown={(e) => handleMouseDown(e, node.id)}
+              onMouseUp={(e) => {
+                handleMouseUp(e)
+                // Only trigger click if we haven't moved the node
+                if (!hasMoved && onNodeClick) {
+                  onNodeClick(node)
+                }
+              }}
               onMouseEnter={() => setHoveredNode(node.id)}
               onMouseLeave={() => setHoveredNode(null)}
-              onClick={(e) => handleNodeClick(e, node)}
             >
               <div className="flex flex-col items-center justify-center h-full p-3 text-center">
                 <div className={`font-medium ${colors.text} text-sm`}>{node.name}</div>
