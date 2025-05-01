@@ -44,7 +44,7 @@ export default function Home() {
   }, [currentSlide])
 
   return (
-    <main className="min-h-screen bg-[#121212] text-white flex flex-col items-center justify-center">
+    <main className="min-h-screen bg-[#0A3538] text-white flex flex-col items-center justify-center">
       <div className="max-w-[1200px] w-full h-screen p-[5%] relative">
         <AnimatePresence mode="wait">
           <motion.div
@@ -72,7 +72,7 @@ export default function Home() {
           <button
             onClick={prevSlide}
             disabled={currentSlide === 0}
-            className="p-2 rounded-full bg-[#00E3E3]/10 text-white disabled:opacity-30"
+            className="p-2 rounded-full bg-[#1D7D74]/20 text-white disabled:opacity-30"
             aria-label="Previous slide"
           >
             <ChevronLeft size={20} />
@@ -85,7 +85,7 @@ export default function Home() {
           <button
             onClick={nextSlide}
             disabled={currentSlide === totalSlides - 1}
-            className="p-2 rounded-full bg-[#00E3E3]/10 text-white disabled:opacity-30"
+            className="p-2 rounded-full bg-[#1D7D74]/20 text-white disabled:opacity-30"
             aria-label="Next slide"
           >
             <ChevronRight size={20} />
