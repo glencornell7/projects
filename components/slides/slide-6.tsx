@@ -2,7 +2,6 @@
 
 import { motion } from "framer-motion"
 import { useState } from "react"
-import { PlaceholderImage } from "@/components/ui/placeholder-image"
 
 export default function Slide6() {
   const [dividerPosition, setDividerPosition] = useState(50)
@@ -34,11 +33,9 @@ export default function Slide6() {
 
         <div className="flex-1 overflow-hidden" style={{ width: `${dividerPosition}%` }}>
           <div className="w-full h-full flex items-center justify-center bg-[#2a2a2a] overflow-hidden">
-            <PlaceholderImage
-              query="original prototype design"
-              alt="Original prototype"
-              width={600}
-              height={500}
+            <img
+              src="https://hebbkx1anhila5yf.public.blob.vercel-storage.com/image-4sokIhoT2ow2l8PU9fSHpH5uEvt2yU.png"
+              alt="Original project showing Organizing Around Outcomes framework"
               className="w-full h-full object-cover"
             />
           </div>
@@ -46,11 +43,9 @@ export default function Slide6() {
 
         <div className="flex-1 overflow-hidden" style={{ width: `${100 - dividerPosition}%` }}>
           <div className="w-full h-full flex items-center justify-center bg-[#2a2a2a] overflow-hidden">
-            <PlaceholderImage
-              query="forked variant of prototype with new design"
-              alt="Forked variant"
-              width={600}
-              height={500}
+            <img
+              src="https://hebbkx1anhila5yf.public.blob.vercel-storage.com/image-Tk2k1CtekxMiazqpJEKle1vUsc8Z8k.png"
+              alt="Forked variant with highlighted new concepts and features"
               className="w-full h-full object-cover"
             />
           </div>
