@@ -42,7 +42,7 @@ interface JourneyMapViewProps {
 export default function JourneyMapView({ onSwitchView }: JourneyMapViewProps) {
   const [zoom, setZoom] = useState(1)
   const [isFullscreen, setIsFullscreen] = useState(false)
-  const [activeView, setActiveView] = useState("journey")
+  const [activeView, setActiveView] = useState("interactive")
   const [searchQuery, setSearchQuery] = useState("")
   const [showPaths, setShowPaths] = useState(true)
   const [showAssociatedContent, setShowAssociatedContent] = useState(false)
@@ -125,7 +125,7 @@ export default function JourneyMapView({ onSwitchView }: JourneyMapViewProps) {
       <div className="bg-white border-b border-gray-200 py-3 px-4">
         <div className="flex items-center">
           <div>
-            <h1 className="text-xl font-semibold text-gray-900">Customer Journey Map</h1>
+            <h1 className="text-xl font-semibold text-gray-900">Customer Lifecycle Map</h1>
             <p className="text-sm text-gray-500 mt-1">
               Visualize how users move through your conversion funnel and identify opportunities
             </p>
@@ -134,7 +134,7 @@ export default function JourneyMapView({ onSwitchView }: JourneyMapViewProps) {
             <div className="relative w-64">
               <Search className="absolute left-2.5 top-2.5 h-4 w-4 text-gray-500" />
               <Input
-                placeholder="Search journey stages..."
+                placeholder="Search stages..."
                 className="pl-9 bg-white border-gray-300 text-gray-900 focus-visible:ring-blue-500"
                 value={searchQuery}
                 onChange={(e) => setSearchQuery(e.target.value)}
@@ -143,10 +143,10 @@ export default function JourneyMapView({ onSwitchView }: JourneyMapViewProps) {
             <Tabs value={activeView} onValueChange={handleViewChange} className="w-auto">
               <TabsList className="bg-gray-100">
                 <TabsTrigger
-                  value="journey"
+                  value="interactive"
                   className="data-[state=active]:bg-white data-[state=active]:text-blue-600 data-[state=active]:shadow-sm"
                 >
-                  Journey View
+                  Interactive View
                 </TabsTrigger>
                 <TabsTrigger
                   value="funnel"
@@ -188,7 +188,7 @@ export default function JourneyMapView({ onSwitchView }: JourneyMapViewProps) {
 
       <div className="flex-1 flex">
         <div className="w-64 bg-white border-r border-gray-200 p-4 flex flex-col">
-          <h2 className="text-lg font-medium text-gray-900 mb-4">Journey Settings</h2>
+          <h2 className="text-lg font-medium text-gray-900 mb-4">Lifecycle Settings</h2>
 
           <div className="space-y-6">
             <div>
@@ -217,7 +217,7 @@ export default function JourneyMapView({ onSwitchView }: JourneyMapViewProps) {
               </DropdownMenu>
             </div>
 
-            {activeView === "journey" && (
+            {activeView === "interactive" && (
               <>
                 <div className="space-y-2">
                   <div className="flex items-center justify-between">
@@ -372,7 +372,7 @@ export default function JourneyMapView({ onSwitchView }: JourneyMapViewProps) {
           <div
             className={`absolute inset-0 transition-opacity duration-300 ${isAnimating ? "opacity-0" : "opacity-100"}`}
           >
-            {activeView === "journey" ? (
+            {activeView === "interactive" ? (
               <JourneyCanvas
                 journeyData={sampleJourneyData}
                 zoom={zoom}
@@ -389,7 +389,7 @@ export default function JourneyMapView({ onSwitchView }: JourneyMapViewProps) {
             )}
           </div>
 
-          {activeView === "journey" && (
+          {activeView === "interactive" && (
             <div className="absolute bottom-4 right-4 flex flex-col bg-white border border-gray-200 rounded-md shadow-sm">
               <TooltipProvider>
                 <Tooltip>

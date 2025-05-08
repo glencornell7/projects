@@ -29,7 +29,7 @@ export default function JourneyMapEmbed() {
   const [minNodeSize, setMinNodeSize] = useState(60)
   const [selectedNode, setSelectedNode] = useState<JourneyStage | null>(null)
   const [isNodeDetailsOpen, setIsNodeDetailsOpen] = useState(false)
-  const [activeView, setActiveView] = useState("journey")
+  const [activeView, setActiveView] = useState("interactive")
   const [isAnimating, setIsAnimating] = useState(false)
 
   const handleNodeClick = (node: JourneyStage) => {
@@ -63,7 +63,7 @@ export default function JourneyMapEmbed() {
     <div className="flex flex-col h-full">
       <div className="p-4 border-b border-gray-200 flex justify-between items-center bg-white">
         <div>
-          <h3 className="text-lg font-medium text-gray-900">Customer Journey Map</h3>
+          <h3 className="text-lg font-medium text-gray-900">Customer Lifecycle Map</h3>
           <p className="text-sm text-gray-500">
             Visualize how users move through your conversion funnel and identify opportunities
           </p>
@@ -94,10 +94,10 @@ export default function JourneyMapEmbed() {
           <Button
             variant="outline"
             className="border-gray-300 text-gray-700 hover:text-gray-900 hover:bg-gray-50"
-            onClick={() => handleViewChange(activeView === "journey" ? "funnel" : "journey")}
+            onClick={() => handleViewChange(activeView === "interactive" ? "funnel" : "interactive")}
           >
             <BarChart2 className="h-4 w-4 mr-2" />
-            {activeView === "journey" ? "Funnel View" : "Journey View"}
+            {activeView === "interactive" ? "Lifecycle View" : "Interactive View"}
           </Button>
           <DropdownMenu>
             <DropdownMenuTrigger asChild>
@@ -137,7 +137,7 @@ export default function JourneyMapEmbed() {
         <div
           className={`absolute inset-0 transition-opacity duration-300 ${isAnimating ? "opacity-0" : "opacity-100"}`}
         >
-          {activeView === "journey" ? (
+          {activeView === "interactive" ? (
             <JourneyCanvas
               journeyData={sampleJourneyData}
               zoom={zoom}

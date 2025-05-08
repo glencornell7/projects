@@ -238,7 +238,7 @@ export default function SankeyView({ journeyData, timeRange, onStageClick }: San
   return (
     <div className="w-full h-full flex flex-col bg-white overflow-auto">
       <div className="p-6">
-        <h2 className="text-xl font-medium mb-6">Customer Journey Flow</h2>
+        <h2 className="text-xl font-medium mb-6">Customer Lifecycle Flow</h2>
 
         <div className="relative" style={{ height: "700px" }}>
           <svg width="100%" height="100%" style={{ overflow: "visible" }}>
@@ -384,10 +384,10 @@ export default function SankeyView({ journeyData, timeRange, onStageClick }: San
         </div>
 
         <div className="mt-6 bg-gray-50 p-4 rounded-lg border border-gray-200">
-          <h3 className="text-md font-medium mb-3">Journey Insights</h3>
+          <h3 className="text-md font-medium mb-3">Lifecycle Insights</h3>
           <div className="grid grid-cols-3 gap-4">
             <div>
-              <div className="text-sm text-gray-500 mb-1">Total Users in Journey</div>
+              <div className="text-sm text-gray-500 mb-1">Total Users in Lifecycle</div>
               <div className="text-xl font-semibold">
                 {nodes
                   .filter((n) => n.type === "visit")
