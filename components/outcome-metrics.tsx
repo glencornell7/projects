@@ -27,10 +27,10 @@ export default function OutcomeMetrics({ goalId, goals }: OutcomeMetricsProps) {
         <div className="flex flex-col md:flex-row justify-between md:items-center gap-4">
           <div>
             <h3 className="text-lg font-medium text-[#e7eced]">
-              {selectedGoal ? `Metrics for: ${selectedGoal.name}` : "All Conversion Goals Metrics"}
+              {selectedGoal ? `Metrics for: ${selectedGoal.name}` : "All Outcome Metrics"}
             </h3>
             <p className="text-[#849699]">
-              {selectedGoal ? selectedGoal.description : "Performance metrics across all conversion goals"}
+              {selectedGoal ? selectedGoal.description : "Performance metrics across all outcomes"}
             </p>
           </div>
           <div className="flex items-center gap-2">
@@ -60,7 +60,7 @@ export default function OutcomeMetrics({ goalId, goals }: OutcomeMetricsProps) {
         <div className="grid grid-cols-1 md:grid-cols-3 gap-4">
           <Card className="bg-[#202c2d] border-[#313d3f] text-[#e7eced]">
             <CardHeader className="pb-2">
-              <CardDescription className="text-[#849699]">Total Conversions</CardDescription>
+              <CardDescription className="text-[#849699]">Total Metrics</CardDescription>
               <CardTitle className="text-2xl text-[#e7eced]">
                 {selectedGoal
                   ? selectedGoal.conversions.toLocaleString()
@@ -114,7 +114,7 @@ export default function OutcomeMetrics({ goalId, goals }: OutcomeMetricsProps) {
                 value="conversions"
                 className="data-[state=active]:bg-[#313d3f] data-[state=active]:text-[#e7eced]"
               >
-                Conversions
+                Metrics
               </TabsTrigger>
               <TabsTrigger
                 value="value"
@@ -126,7 +126,7 @@ export default function OutcomeMetrics({ goalId, goals }: OutcomeMetricsProps) {
                 value="campaigns"
                 className="data-[state=active]:bg-[#313d3f] data-[state=active]:text-[#e7eced]"
               >
-                Campaigns
+                Tactics
               </TabsTrigger>
             </TabsList>
             <TabsContent value="conversions">
@@ -134,8 +134,8 @@ export default function OutcomeMetrics({ goalId, goals }: OutcomeMetricsProps) {
                 <CardContent className="p-6">
                   <div className="h-[300px] flex items-center justify-center">
                     <div className="text-center text-[#849699]">
-                      <p>Conversion Trend Chart</p>
-                      <p className="text-xs mt-2">Shows conversion volume over time</p>
+                      <p>Metric Trend Chart</p>
+                      <p className="text-xs mt-2">Shows metric volume over time</p>
                     </div>
                   </div>
                 </CardContent>
@@ -158,8 +158,8 @@ export default function OutcomeMetrics({ goalId, goals }: OutcomeMetricsProps) {
                 <CardContent className="p-6">
                   <div className="h-[300px] flex items-center justify-center">
                     <div className="text-center text-[#849699]">
-                      <p>Campaign Performance Chart</p>
-                      <p className="text-xs mt-2">Compares campaign effectiveness for this goal</p>
+                      <p>Tactic Performance Chart</p>
+                      <p className="text-xs mt-2">Compares tactic effectiveness for this outcome</p>
                     </div>
                   </div>
                 </CardContent>
@@ -170,9 +170,9 @@ export default function OutcomeMetrics({ goalId, goals }: OutcomeMetricsProps) {
 
         <Card className="bg-[#202c2d] border-[#313d3f] text-[#e7eced]">
           <CardHeader>
-            <CardTitle className="text-lg text-[#e7eced]">Top Performing Campaigns</CardTitle>
+            <CardTitle className="text-lg text-[#e7eced]">Top Performing Tactics</CardTitle>
             <CardDescription className="text-[#849699]">
-              Campaigns with the highest conversion rates for this goal
+              Tactics with the highest metric rates for this outcome
             </CardDescription>
           </CardHeader>
           <CardContent>
@@ -187,7 +187,7 @@ export default function OutcomeMetrics({ goalId, goals }: OutcomeMetricsProps) {
                     </div>
                   </div>
                   <div className="text-right">
-                    <p className="text-[#e7eced]">{campaign.conversions} conversions</p>
+                    <p className="text-[#e7eced]">{campaign.conversions} metrics</p>
                     <p className="text-xs text-[#849699]">${campaign.value.toLocaleString()} value</p>
                   </div>
                 </div>

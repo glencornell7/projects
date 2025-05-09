@@ -54,7 +54,7 @@ export default function CampaignList({ campaigns, goalId }: CampaignListProps) {
       <div className="p-6 space-y-4">
         {selectedGoal && (
           <div className="mb-6">
-            <h3 className="text-lg font-medium text-gray-900 mb-2">Campaigns Contributing to: {selectedGoal.name}</h3>
+            <h3 className="text-lg font-medium text-gray-900 mb-2">Tactics Contributing to: {selectedGoal.name}</h3>
             <p className="text-gray-500 mb-4">{selectedGoal.description}</p>
             <div className="grid grid-cols-1 md:grid-cols-3 gap-4 mb-4">
               <div className="bg-gray-50 p-4 rounded-md border border-gray-200">
@@ -62,7 +62,7 @@ export default function CampaignList({ campaigns, goalId }: CampaignListProps) {
                 <p className="text-2xl font-semibold text-gray-900">${selectedGoal.value.toLocaleString()}</p>
               </div>
               <div className="bg-gray-50 p-4 rounded-md border border-gray-200">
-                <p className="text-gray-500 text-sm mb-1">Conversions</p>
+                <p className="text-gray-500 text-sm mb-1">Metrics</p>
                 <p className="text-2xl font-semibold text-gray-900">{selectedGoal.conversions.toLocaleString()}</p>
               </div>
               <div className="bg-gray-50 p-4 rounded-md border border-gray-200">
@@ -78,8 +78,8 @@ export default function CampaignList({ campaigns, goalId }: CampaignListProps) {
 
         {campaigns.length === 0 ? (
           <div className="text-center py-12">
-            <p className="text-gray-500">No campaigns found for this conversion goal.</p>
-            <Button className="mt-4 bg-blue-500 hover:bg-blue-600 text-white">Create New Campaign</Button>
+            <p className="text-gray-500">No tactics found for this outcome metric.</p>
+            <Button className="mt-4 bg-blue-500 hover:bg-blue-600 text-white">Create New Tactic</Button>
           </div>
         ) : (
           campaigns.map((campaign) => (
@@ -121,7 +121,7 @@ export default function CampaignList({ campaigns, goalId }: CampaignListProps) {
                 </div>
                 <div className="flex items-center space-x-4">
                   <div className="text-right">
-                    <p className="text-gray-900">{campaign.conversions} conversions</p>
+                    <p className="text-gray-900">{campaign.conversions} metrics</p>
                     <p className="text-gray-500 text-sm">${campaign.value.toLocaleString()} value</p>
                   </div>
                   <ChevronDown
@@ -148,7 +148,7 @@ export default function CampaignList({ campaigns, goalId }: CampaignListProps) {
                   </div>
 
                   <div className="mb-4">
-                    <p className="text-gray-500 text-sm mb-1">Contributing to Conversion Goals</p>
+                    <p className="text-gray-500 text-sm mb-1">Contributing to Outcome Metrics</p>
                     <div className="flex flex-wrap gap-2 mt-1">
                       {campaign.goalIds.map((goalId) => {
                         const goal = conversionGoals.find((g) => g.id === goalId)
@@ -192,7 +192,7 @@ export default function CampaignList({ campaigns, goalId }: CampaignListProps) {
                         </p>
                       </div>
                       <div>
-                        <p className="text-xs text-gray-500">Converted</p>
+                        <p className="text-xs text-gray-500">Metrics</p>
                         <p className="text-gray-900 font-medium">
                           {campaign.conversions.toLocaleString()} (
                           {Math.round((campaign.conversions / campaign.metrics.sent) * 100)}%)

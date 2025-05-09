@@ -37,18 +37,18 @@ export default function ViewSelector() {
         >
           <CardHeader>
             <Target className="h-10 w-10 text-blue-500 mb-2" />
-            <CardTitle>Conversion Goals</CardTitle>
-            <CardDescription>Organize campaigns by business outcomes</CardDescription>
+            <CardTitle>Index View</CardTitle>
+            <CardDescription>Organize metrics by lifecycle stages</CardDescription>
           </CardHeader>
           <CardContent>
             <p className="text-gray-600">
-              Define and track conversion goals that align with your business objectives. Organize campaigns and
-              messaging around these goals.
+              Define and track metrics that align with your business objectives. Organize campaigns and messaging around
+              these metrics across different lifecycle stages.
             </p>
           </CardContent>
           <CardFooter>
             <Button variant="outline" className="w-full">
-              View Conversion Goals
+              View Index
             </Button>
           </CardFooter>
         </Card>
@@ -63,13 +63,13 @@ export default function ViewSelector() {
         >
           <CardHeader>
             <LayoutDashboard className="h-10 w-10 text-blue-500 mb-2" />
-            <CardTitle>Dashboard</CardTitle>
-            <CardDescription>Track performance of your conversion goals</CardDescription>
+            <CardTitle>Dashboard View</CardTitle>
+            <CardDescription>Track performance of your metrics</CardDescription>
           </CardHeader>
           <CardContent>
             <p className="text-gray-600">
-              Monitor the performance of your conversion goals with detailed analytics. See which campaigns are driving
-              the most valuable outcomes.
+              Monitor the performance of your metrics with detailed analytics. See which campaigns are driving the most
+              valuable outcomes across your customer lifecycle.
             </p>
           </CardContent>
           <CardFooter>
@@ -90,12 +90,12 @@ export default function ViewSelector() {
           <CardHeader>
             <BarChart2 className="h-10 w-10 text-blue-500 mb-2" />
             <CardTitle>Lifecycle Map</CardTitle>
-            <CardDescription>Visualize customer lifecycle and conversions</CardDescription>
+            <CardDescription>Visualize customer lifecycle and metrics</CardDescription>
           </CardHeader>
           <CardContent>
             <p className="text-gray-600">
-              See how users move through your conversion funnel and identify opportunities to improve conversion rates
-              with interactive visualizations.
+              See how users move through your customer lifecycle and identify opportunities to improve metrics with
+              interactive visualizations.
             </p>
           </CardContent>
           <CardFooter>

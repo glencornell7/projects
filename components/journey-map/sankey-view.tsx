@@ -453,7 +453,7 @@ export default function SankeyView({ journeyData, timeRange, onStageClick }: San
                 </div>
 
                 <div className="space-y-4">
-                  <h3 className="text-lg font-medium text-gray-900">Associated Campaigns</h3>
+                  <h3 className="text-lg font-medium text-gray-900">Associated Tactics</h3>
                   {selectedNode.type === "conversion" && (
                     <div className="space-y-2">
                       {getAssociatedCampaigns(selectedNode.id).length > 0 ? (
@@ -467,13 +467,13 @@ export default function SankeyView({ journeyData, timeRange, onStageClick }: San
                               <p className="text-sm text-gray-500">{campaign.audience}</p>
                             </div>
                             <div className="text-right">
-                              <p className="text-sm text-gray-900">{campaign.conversions} conversions</p>
+                              <p className="text-sm text-gray-900">{campaign.conversions} metrics</p>
                               <p className="text-xs text-gray-500">${campaign.value.toLocaleString()} value</p>
                             </div>
                           </div>
                         ))
                       ) : (
-                        <p className="text-gray-500">No campaigns associated with this conversion.</p>
+                        <p className="text-gray-500">No tactics associated with this conversion.</p>
                       )}
                     </div>
                   )}

@@ -2,13 +2,14 @@ export interface ConversionGoal {
   id: string
   name: string
   description: string
-  category: "acquisition" | "activation" | "retention" | "expansion"
+  category: "acquisition" | "activation" | "engagement" | "monetization" | "retention" | "expansion"
   value: number
   conversions: number
   target: number
   campaigns: number
   trend: number
   trendData?: number[] // Array of historical conversion counts
+  metricType?: "outcome" | "aha" // Made optional so not all metrics have a type
 }
 
 export interface Campaign {

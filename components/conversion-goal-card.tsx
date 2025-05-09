@@ -35,7 +35,7 @@ export default function ConversionGoalCard({ goal, onSelect }: ConversionGoalCar
                     : "category-expansion"
             }`}
           >
-            {category.charAt(0).toUpperCase() + category.slice(1)}
+            {category.charAt(0).toUpperCase() + category.slice(1)} Stage
           </Badge>
           <CircleDollarSign
             className={`
@@ -64,7 +64,7 @@ export default function ConversionGoalCard({ goal, onSelect }: ConversionGoalCar
             </div>
           </div>
           <div>
-            <p className="text-gray-500 text-sm mb-1">Conversions</p>
+            <p className="text-gray-500 text-sm mb-1">Metrics</p>
             <p className="text-xl font-semibold text-gray-900">{conversions.toLocaleString()}</p>
             <p className="text-xs text-gray-500 mt-1">Target: {target.toLocaleString()}</p>
           </div>
@@ -90,7 +90,7 @@ export default function ConversionGoalCard({ goal, onSelect }: ConversionGoalCar
         <div className="flex justify-between items-center w-full">
           <div className="flex items-center text-gray-500">
             <BarChart3 className="h-4 w-4 mr-1" />
-            <span className="text-sm">{campaigns} campaigns</span>
+            <span className="text-sm">{campaigns} tactics</span>
           </div>
           <Button
             variant="ghost"

@@ -307,7 +307,7 @@ export default function MergedFunnelView({
         {/* Lifecycle stages */}
         <div className="mb-6">
           <div className="flex justify-between items-center mb-4">
-            <h2 className="text-lg font-medium">Stages</h2>
+            <h2 className="text-lg font-medium">Lifecycle Stages</h2>
             <div className="flex items-center gap-4">
               <div className="flex items-center gap-2">
                 <div className="w-3 h-3 rounded-full bg-purple-200"></div>
@@ -747,7 +747,7 @@ export default function MergedFunnelView({
                     )}
                   </div>
 
-                  <h3 className="text-lg font-medium text-gray-900 mt-4">Related Campaigns</h3>
+                  <h3 className="text-lg font-medium text-gray-900 mt-4">Related Tactics</h3>
                   <div className="space-y-2">
                     <div className="p-3 bg-white border border-gray-200 rounded-md flex justify-between items-center">
                       <div>
@@ -789,7 +789,7 @@ export default function MergedFunnelView({
               <div className="py-4">
                 <div className="grid grid-cols-2 gap-4 mb-4">
                   <div className="bg-gray-50 p-4 rounded-md border border-gray-200">
-                    <p className="text-gray-500 text-sm mb-1">Conversion Count</p>
+                    <p className="text-gray-500 text-sm mb-1">Metric Count</p>
                     <p className="text-2xl font-semibold text-gray-900">{selectedConversion.count.toLocaleString()}</p>
                   </div>
                   <div className="bg-gray-50 p-4 rounded-md border border-gray-200">
@@ -842,7 +842,7 @@ export default function MergedFunnelView({
                     </div>
                   </div>
 
-                  <h3 className="text-lg font-medium text-gray-900 mt-4">Associated Campaigns</h3>
+                  <h3 className="text-lg font-medium text-gray-900 mt-4">Associated Tactics</h3>
                   <div className="space-y-2">
                     {selectedConversion.campaigns.map((campaign, index) => (
                       <div
