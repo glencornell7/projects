@@ -1,32 +1,39 @@
 "use client"
 
-import { useState } from "react"
-import { useRouter } from "next/navigation"
-import Link from "next/link"
-import { ArrowUpDown, ChevronDown, Filter, MapPin, Plus, Search, Settings, DollarSign, AlertCircle } from "lucide-react"
+import { useState, useMemo } from "react"
+import {
+  BarChart3,
+  ChevronDown,
+  Filter,
+  LayoutGrid,
+  List,
+  Plus,
+  Search,
+  SlidersHorizontal,
+  Sparkles,
+  Star,
+} from "lucide-react"
 import { Button } from "@/components/ui/button"
 import { Input } from "@/components/ui/input"
-import { Badge } from "@/components/ui/badge"
 import {
   DropdownMenu,
+  DropdownMenuCheckboxItem,
   DropdownMenuContent,
-  DropdownMenuItem,
   DropdownMenuLabel,
   DropdownMenuSeparator,
   DropdownMenuTrigger,
 } from "@/components/ui/dropdown-menu"
-import { Popover, PopoverContent, PopoverTrigger } from "@/components/ui/popover"
-import { Checkbox } from "@/components/ui/checkbox"
-import { Label } from "@/components/ui/label"
+import { Table, TableBody, TableCell, TableHead, TableHeader, TableRow } from "@/components/ui/table"
 import { Tooltip, TooltipContent, TooltipProvider, TooltipTrigger } from "@/components/ui/tooltip"
-import type { ConversionGoal } from "@/lib/types"
-import { campaigns } from "@/lib/sample-data-enhanced"
-import ConversionGoalSheet from "@/components/conversion-goal-sheet"
-import { TrendChart } from "@/components/trend-chart"
-import { Glossary } from "@/components/glossary"
+import { Badge } from "@/components/ui/badge"
+import { Tabs, TabsContent, TabsList, TabsTrigger } from "@/components/ui/tabs"
+import ConversionGoalCard from "./conversion-goal-card"
+import { TrendChart } from "./trend-chart"
+import { useData } from "@/lib/data-context"
+import { Sheet, SheetContent } from "@/components/ui/sheet"
+import { AddTacticForm } from "./add-tactic-form"
 
 interface ConversionGoalIndexProps {
-  goals: ConversionGoal[]
   onGoalSelect: (goalId: string) => void
   onCreateGoal: () => void
   onSwitchView: () => void
@@ -34,52 +41,65 @@ interface ConversionGoalIndexProps {
 }
 
 export default function ConversionGoalIndex({
-  goals,
   onGoalSelect,
   onCreateGoal,
   onSwitchView,
   onViewJourneyMap,
 }: ConversionGoalIndexProps) {
+  const { goals, getCampaignsForGoal } = useData()
+
   const [searchQuery, setSearchQuery] = useState("")
-  const router = useRouter()
-  const [isCreatorOpen, setIsCreatorOpen] = useState(false)
+  const [viewMode, setViewMode] = useState<"grid" | "list">("list")
+  const [sortBy, setSortBy] = useState<"name" | "value" | "conversions" | "trend">("conversions")
+  const [sortOrder, setSortOrder] = useState<"asc" | "desc">("desc")
+  const [selectedCategories, setSelectedCategories] = useState<string[]>([
+    "acquisition",
+    "activation",
+    "engagement",
+    "monetization",
+    "retention",
+    "expansion",
+  ])
+  const [selectedMetricTypes, setSelectedMetricTypes] = useState<string[]>(["outcome", "aha", "standard"])
+  const [isAddTacticOpen, setIsAddTacticOpen] = useState(false)
+  const [selectedGoalId, setSelectedGoalId] = useState<string | undefined>(undefined)
 
-  // State for lifecycle stage filters (multi-select)
-  const [selectedStages, setSelectedStages] = useState<string[]>([])
-
-  // State for metric type filters (multi-select)
-  const [selectedMetricTypes, setSelectedMetricTypes] = useState<string[]>([])
-
-  const filteredGoals = goals.filter((goal) => {
-    // Filter by search query
-    if (
-      searchQuery &&
-      !goal.name.toLowerCase().includes(searchQuery.toLowerCase()) &&
-      !goal.description.toLowerCase().includes(searchQuery.toLowerCase())
-    ) {
-      return false
+  const handleSort = (column: "name" | "value" | "conversions" | "trend") => {
+    if (sortBy === column) {
+      setSortOrder(sortOrder === "asc" ? "desc" : "asc")
+    } else {
+      setSortBy(column)
+      setSortOrder("desc")
     }
-
-    // Filter by lifecycle stage (if any selected)
-    if (selectedStages.length > 0 && !selectedStages.includes(goal.category)) {
-      return false
-    }
-
-    // Filter by metric type (if any selected)
-    if (selectedMetricTypes.length > 0) {
-      // If metric type filter is active but the goal has no metricType, exclude it
-      if (!goal.metricType) return false
-
-      // If the goal's metricType is not in the selected types, exclude it
-      if (!selectedMetricTypes.includes(goal.metricType)) return false
-    }
-
-    return true
-  })
-
-  const handleGoalClick = (goalId: string) => {
-    router.push(`/conversion-goals/${goalId}`)
   }
+
+  const filteredGoals = useMemo(() => {
+    return goals
+      .filter((goal) => {
+        const matchesSearch =
+          goal.name.toLowerCase().includes(searchQuery.toLowerCase()) ||
+          goal.description.toLowerCase().includes(searchQuery.toLowerCase())
+        const matchesCategory = selectedCategories.includes(goal.category)
+        const matchesMetricType =
+          (goal.metricType === "outcome" && selectedMetricTypes.includes("outcome")) ||
+          (goal.metricType === "aha" && selectedMetricTypes.includes("aha")) ||
+          (!goal.metricType && selectedMetricTypes.includes("standard"))
+
+        return matchesSearch && matchesCategory && matchesMetricType
+      })
+      .sort((a, b) => {
+        if (sortBy === "name") {
+          return sortOrder === "asc" ? a.name.localeCompare(b.name) : b.name.localeCompare(a.name)
+        } else if (sortBy === "value") {
+          return sortOrder === "asc" ? a.value - b.value : b.value - a.value
+        } else if (sortBy === "trend") {
+          return sortOrder === "asc" ? a.trend - b.trend : b.trend - a.trend
+        } else {
+          // Default sort by conversions
+          return sortOrder === "asc" ? a.conversions - b.conversions : b.conversions - a.conversions
+        }
+      })
+  }, [goals, searchQuery, sortBy, sortOrder, selectedCategories, selectedMetricTypes])
 
   // Helper function to get chart colors based on category
   const getCategoryColors = (category: string) => {
@@ -121,420 +141,705 @@ export default function ConversionGoalIndex({
     }
   }
 
-  // Toggle a lifecycle stage filter
-  const toggleStageFilter = (stage: string) => {
-    setSelectedStages((prev) => (prev.includes(stage) ? prev.filter((s) => s !== stage) : [...prev, stage]))
-  }
-
-  // Toggle a metric type filter
-  const toggleMetricTypeFilter = (type: string) => {
-    setSelectedMetricTypes((prev) => (prev.includes(type) ? prev.filter((t) => t !== type) : [...prev, type]))
-  }
-
-  // Get the display text for lifecycle stage filter button
-  const getStageFilterDisplayText = () => {
-    if (selectedStages.length === 0) return "All Lifecycle Stages"
-    if (selectedStages.length === 1) {
-      const stage = selectedStages[0]
-      return stage.charAt(0).toUpperCase() + stage.slice(1)
-    }
-    return `${selectedStages.length} stages selected`
-  }
-
-  // Get the display text for metric type filter button
-  const getMetricTypeFilterDisplayText = () => {
-    if (selectedMetricTypes.length === 0) return "All Metric Types"
-    if (selectedMetricTypes.length === 1) {
-      const type = selectedMetricTypes[0]
-      return type === "outcome" ? "Outcome Metrics" : "Aha Moment Metrics"
-    }
-    return `${selectedMetricTypes.length} types selected`
+  const openAddTacticPanel = (goalId?: string) => {
+    setSelectedGoalId(goalId)
+    setIsAddTacticOpen(true)
   }
 
   return (
-    <div className="min-h-screen bg-gray-50">
-      <div className="bg-white border-b border-gray-200 py-8 px-4">
-        <div className="container mx-auto max-w-7xl">
-          <div className="flex justify-between items-center">
-            <div>
-              <div className="flex items-center">
-                <h1 className="text-3xl font-bold mb-2 text-gray-900">Metrics</h1>
-                <Glossary />
-              </div>
-              <p className="text-gray-500">
-                {selectedStages.length === 0
-                  ? "All metrics across your customer lifecycle"
-                  : selectedStages.length === 1
-                    ? `${selectedStages[0].charAt(0).toUpperCase() + selectedStages[0].slice(1)} stage metrics for your customer lifecycle`
-                    : `${selectedStages.length} lifecycle stages selected`}
-              </p>
-            </div>
-            <div className="flex gap-3">
-              <Link href="/lifecycle-map">
-                <Button
-                  variant="outline"
-                  className="border-gray-300 text-gray-700 hover:text-gray-900 hover:bg-gray-50"
-                >
-                  <MapPin className="mr-2 h-4 w-4" />
-                  Lifecycle Map
-                </Button>
-              </Link>
-              <Link href="/dashboard">
-                <Button
-                  variant="outline"
-                  className="border-gray-300 text-gray-700 hover:text-gray-900 hover:bg-gray-50"
-                >
-                  <Settings className="mr-2 h-4 w-4" />
-                  Switch to Dashboard View
-                </Button>
-              </Link>
-              <Button className="bg-[#7265dc] hover:bg-[#5d4fc7] text-white" onClick={() => setIsCreatorOpen(true)}>
-                <Plus className="mr-2 h-4 w-4" />
-                New Metric
-              </Button>
-            </div>
-          </div>
+    <div className="container mx-auto py-6">
+      <div className="flex flex-col md:flex-row justify-between items-start md:items-center mb-6 gap-4">
+        <div>
+          <h1 className="text-2xl font-bold text-gray-900">Metrics</h1>
+          <p className="text-gray-500">Track and analyze key metrics across the customer lifecycle</p>
+        </div>
+        <div className="flex items-center gap-2">
+          <Button variant="outline" onClick={onSwitchView} className="border-gray-300 hover:bg-gray-50">
+            <BarChart3 className="h-4 w-4 mr-2" />
+            Dashboard View
+          </Button>
+          <Button variant="outline" onClick={onViewJourneyMap} className="border-gray-300 hover:bg-gray-50">
+            <SlidersHorizontal className="h-4 w-4 mr-2" />
+            Lifecycle Map
+          </Button>
+          <Button onClick={onCreateGoal} className="bg-[#7265dc] hover:bg-[#5d4fc7]">
+            <Plus className="h-4 w-4 mr-2" />
+            New Metric
+          </Button>
         </div>
       </div>
 
-      <div className="container mx-auto py-6 px-4 max-w-7xl">
-        <div className="bg-white border border-gray-200 rounded-md shadow-sm mb-8">
-          <div className="p-4 border-b border-gray-200 flex flex-col md:flex-row justify-between gap-4">
-            <div className="flex flex-wrap items-center gap-2">
-              {/* Lifecycle Stage Filter with Checkboxes */}
-              <Popover>
-                <PopoverTrigger asChild>
-                  <Button
-                    variant="outline"
-                    className="border-gray-300 text-gray-700 hover:text-gray-900 hover:bg-gray-50"
-                  >
-                    {getStageFilterDisplayText()}
-                    <ChevronDown className="h-4 w-4 ml-2" />
-                  </Button>
-                </PopoverTrigger>
-                <PopoverContent className="w-56 p-0" align="start">
-                  <div className="p-3 border-b border-gray-100">
-                    <h3 className="font-medium text-sm">Lifecycle Stages</h3>
-                  </div>
-                  <div className="p-3">
-                    <div className="space-y-3">
-                      <div className="flex items-center space-x-2">
-                        <Checkbox
-                          id="stage-acquisition"
-                          checked={selectedStages.includes("acquisition")}
-                          onCheckedChange={() => toggleStageFilter("acquisition")}
-                        />
-                        <Label htmlFor="stage-acquisition" className="text-sm font-normal cursor-pointer">
-                          Acquisition
-                        </Label>
-                      </div>
-                      <div className="flex items-center space-x-2">
-                        <Checkbox
-                          id="stage-activation"
-                          checked={selectedStages.includes("activation")}
-                          onCheckedChange={() => toggleStageFilter("activation")}
-                        />
-                        <Label htmlFor="stage-activation" className="text-sm font-normal cursor-pointer">
-                          Activation
-                        </Label>
-                      </div>
-                      <div className="flex items-center space-x-2">
-                        <Checkbox
-                          id="stage-engagement"
-                          checked={selectedStages.includes("engagement")}
-                          onCheckedChange={() => toggleStageFilter("engagement")}
-                        />
-                        <Label htmlFor="stage-engagement" className="text-sm font-normal cursor-pointer">
-                          Engagement
-                        </Label>
-                      </div>
-                      <div className="flex items-center space-x-2">
-                        <Checkbox
-                          id="stage-monetization"
-                          checked={selectedStages.includes("monetization")}
-                          onCheckedChange={() => toggleStageFilter("monetization")}
-                        />
-                        <Label htmlFor="stage-monetization" className="text-sm font-normal cursor-pointer">
-                          Monetization
-                        </Label>
-                      </div>
-                      <div className="flex items-center space-x-2">
-                        <Checkbox
-                          id="stage-retention"
-                          checked={selectedStages.includes("retention")}
-                          onCheckedChange={() => toggleStageFilter("retention")}
-                        />
-                        <Label htmlFor="stage-retention" className="text-sm font-normal cursor-pointer">
-                          Retention
-                        </Label>
-                      </div>
-                      <div className="flex items-center space-x-2">
-                        <Checkbox
-                          id="stage-expansion"
-                          checked={selectedStages.includes("expansion")}
-                          onCheckedChange={() => toggleStageFilter("expansion")}
-                        />
-                        <Label htmlFor="stage-expansion" className="text-sm font-normal cursor-pointer">
-                          Expansion
-                        </Label>
-                      </div>
-                    </div>
-                  </div>
-                </PopoverContent>
-              </Popover>
-
-              {/* Metric Type Filter with Checkboxes */}
-              <Popover>
-                <PopoverTrigger asChild>
-                  <Button
-                    variant="outline"
-                    className="border-gray-300 text-gray-700 hover:text-gray-900 hover:bg-gray-50"
-                  >
-                    {getMetricTypeFilterDisplayText()}
-                    <ChevronDown className="h-4 w-4 ml-2" />
-                  </Button>
-                </PopoverTrigger>
-                <PopoverContent className="w-56 p-0" align="start">
-                  <div className="p-3 border-b border-gray-100">
-                    <h3 className="font-medium text-sm">Metric Types</h3>
-                  </div>
-                  <div className="p-3">
-                    <div className="space-y-3">
-                      <div className="flex items-center space-x-2">
-                        <Checkbox
-                          id="type-outcome"
-                          checked={selectedMetricTypes.includes("outcome")}
-                          onCheckedChange={() => toggleMetricTypeFilter("outcome")}
-                        />
-                        <Label htmlFor="type-outcome" className="text-sm font-normal cursor-pointer">
-                          Outcome Metrics
-                        </Label>
-                      </div>
-                      <div className="flex items-center space-x-2">
-                        <Checkbox
-                          id="type-aha"
-                          checked={selectedMetricTypes.includes("aha")}
-                          onCheckedChange={() => toggleMetricTypeFilter("aha")}
-                        />
-                        <Label htmlFor="type-aha" className="text-sm font-normal cursor-pointer">
-                          Aha Moment Metrics
-                        </Label>
-                      </div>
-                    </div>
-                  </div>
-                </PopoverContent>
-              </Popover>
+      <div className="bg-white border rounded-lg shadow-sm mb-6">
+        <div className="p-4 border-b">
+          <div className="flex flex-col md:flex-row gap-4 justify-between">
+            <div className="relative w-full md:w-96">
+              <Search className="absolute left-2.5 top-2.5 h-4 w-4 text-gray-500" />
+              <Input
+                type="search"
+                placeholder="Search metrics..."
+                className="pl-8 border-gray-300 focus-visible:ring-[#7265dc]"
+                value={searchQuery}
+                onChange={(e) => setSearchQuery(e.target.value)}
+              />
             </div>
-
-            <div className="flex gap-2 w-full md:w-auto">
-              <div className="relative flex-1 md:w-64">
-                <Search className="absolute left-2.5 top-2.5 h-4 w-4 text-gray-500" />
-                <Input
-                  placeholder="Search metrics..."
-                  className="pl-9 bg-white border-gray-300 text-gray-900 focus-visible:ring-[#7265dc] w-full"
-                  value={searchQuery}
-                  onChange={(e) => setSearchQuery(e.target.value)}
-                />
-              </div>
+            <div className="flex items-center gap-2">
               <DropdownMenu>
                 <DropdownMenuTrigger asChild>
-                  <Button
-                    variant="outline"
-                    className="border-gray-300 text-gray-700 hover:text-gray-900 hover:bg-gray-50"
-                  >
-                    <Filter className="h-4 w-4 mr-2" />
-                    Sort
-                    <ChevronDown className="h-4 w-4 ml-2" />
+                  <Button variant="outline" className="flex items-center gap-1 border-gray-300 hover:bg-gray-50">
+                    <Filter className="h-4 w-4" />
+                    Filter
+                    <ChevronDown className="h-4 w-4 ml-1" />
                   </Button>
                 </DropdownMenuTrigger>
-                <DropdownMenuContent className="bg-white border-gray-200 text-gray-900">
-                  <DropdownMenuLabel>Sort By</DropdownMenuLabel>
-                  <DropdownMenuSeparator className="bg-gray-200" />
-                  <DropdownMenuItem className="focus:bg-gray-100">Highest Value</DropdownMenuItem>
-                  <DropdownMenuItem className="focus:bg-gray-100">Most Events</DropdownMenuItem>
-                  <DropdownMenuItem className="focus:bg-gray-100">Recently Created</DropdownMenuItem>
-                  <DropdownMenuItem className="focus:bg-gray-100">Alphabetical</DropdownMenuItem>
+                <DropdownMenuContent align="end" className="w-56">
+                  <DropdownMenuLabel>Lifecycle Stage</DropdownMenuLabel>
+                  <DropdownMenuSeparator />
+                  <DropdownMenuCheckboxItem
+                    checked={selectedCategories.includes("acquisition")}
+                    onCheckedChange={(checked) => {
+                      if (checked) {
+                        setSelectedCategories([...selectedCategories, "acquisition"])
+                      } else {
+                        setSelectedCategories(selectedCategories.filter((c) => c !== "acquisition"))
+                      }
+                    }}
+                  >
+                    Acquisition
+                  </DropdownMenuCheckboxItem>
+                  <DropdownMenuCheckboxItem
+                    checked={selectedCategories.includes("activation")}
+                    onCheckedChange={(checked) => {
+                      if (checked) {
+                        setSelectedCategories([...selectedCategories, "activation"])
+                      } else {
+                        setSelectedCategories(selectedCategories.filter((c) => c !== "activation"))
+                      }
+                    }}
+                  >
+                    Activation
+                  </DropdownMenuCheckboxItem>
+                  <DropdownMenuCheckboxItem
+                    checked={selectedCategories.includes("engagement")}
+                    onCheckedChange={(checked) => {
+                      if (checked) {
+                        setSelectedCategories([...selectedCategories, "engagement"])
+                      } else {
+                        setSelectedCategories(selectedCategories.filter((c) => c !== "engagement"))
+                      }
+                    }}
+                  >
+                    Engagement
+                  </DropdownMenuCheckboxItem>
+                  <DropdownMenuCheckboxItem
+                    checked={selectedCategories.includes("monetization")}
+                    onCheckedChange={(checked) => {
+                      if (checked) {
+                        setSelectedCategories([...selectedCategories, "monetization"])
+                      } else {
+                        setSelectedCategories(selectedCategories.filter((c) => c !== "monetization"))
+                      }
+                    }}
+                  >
+                    Monetization
+                  </DropdownMenuCheckboxItem>
+                  <DropdownMenuCheckboxItem
+                    checked={selectedCategories.includes("retention")}
+                    onCheckedChange={(checked) => {
+                      if (checked) {
+                        setSelectedCategories([...selectedCategories, "retention"])
+                      } else {
+                        setSelectedCategories(selectedCategories.filter((c) => c !== "retention"))
+                      }
+                    }}
+                  >
+                    Retention
+                  </DropdownMenuCheckboxItem>
+                  <DropdownMenuCheckboxItem
+                    checked={selectedCategories.includes("expansion")}
+                    onCheckedChange={(checked) => {
+                      if (checked) {
+                        setSelectedCategories([...selectedCategories, "expansion"])
+                      } else {
+                        setSelectedCategories(selectedCategories.filter((c) => c !== "expansion"))
+                      }
+                    }}
+                  >
+                    Expansion
+                  </DropdownMenuCheckboxItem>
                 </DropdownMenuContent>
               </DropdownMenu>
+
+              <DropdownMenu>
+                <DropdownMenuTrigger asChild>
+                  <Button variant="outline" className="flex items-center gap-1 border-gray-300 hover:bg-gray-50">
+                    <Sparkles className="h-4 w-4" />
+                    Metric Type
+                    <ChevronDown className="h-4 w-4 ml-1" />
+                  </Button>
+                </DropdownMenuTrigger>
+                <DropdownMenuContent align="end" className="w-56">
+                  <DropdownMenuLabel>Metric Type</DropdownMenuLabel>
+                  <DropdownMenuSeparator />
+                  <DropdownMenuCheckboxItem
+                    checked={selectedMetricTypes.includes("outcome")}
+                    onCheckedChange={(checked) => {
+                      if (checked) {
+                        setSelectedMetricTypes([...selectedMetricTypes, "outcome"])
+                      } else {
+                        setSelectedMetricTypes(selectedMetricTypes.filter((t) => t !== "outcome"))
+                      }
+                    }}
+                  >
+                    Outcome Metrics
+                  </DropdownMenuCheckboxItem>
+                  <DropdownMenuCheckboxItem
+                    checked={selectedMetricTypes.includes("aha")}
+                    onCheckedChange={(checked) => {
+                      if (checked) {
+                        setSelectedMetricTypes([...selectedMetricTypes, "aha"])
+                      } else {
+                        setSelectedMetricTypes(selectedMetricTypes.filter((t) => t !== "aha"))
+                      }
+                    }}
+                  >
+                    Aha Moment Metrics
+                  </DropdownMenuCheckboxItem>
+                  <DropdownMenuCheckboxItem
+                    checked={selectedMetricTypes.includes("standard")}
+                    onCheckedChange={(checked) => {
+                      if (checked) {
+                        setSelectedMetricTypes([...selectedMetricTypes, "standard"])
+                      } else {
+                        setSelectedMetricTypes(selectedMetricTypes.filter((t) => t !== "standard"))
+                      }
+                    }}
+                  >
+                    Standard Metrics
+                  </DropdownMenuCheckboxItem>
+                </DropdownMenuContent>
+              </DropdownMenu>
+
+              <div className="border rounded-md flex">
+                <Button
+                  variant="ghost"
+                  size="icon"
+                  className={`rounded-none ${viewMode === "list" ? "bg-gray-100" : ""}`}
+                  onClick={() => setViewMode("list")}
+                >
+                  <List className="h-4 w-4" />
+                  <span className="sr-only">List view</span>
+                </Button>
+                <Button
+                  variant="ghost"
+                  size="icon"
+                  className={`rounded-none ${viewMode === "grid" ? "bg-gray-100" : ""}`}
+                  onClick={() => setViewMode("grid")}
+                >
+                  <LayoutGrid className="h-4 w-4" />
+                  <span className="sr-only">Grid view</span>
+                </Button>
+              </div>
             </div>
           </div>
+        </div>
 
-          <div className="p-4">
-            <div className="text-gray-500 text-sm mb-4">
-              {filteredGoals.length} metrics {searchQuery ? `matching "${searchQuery}"` : ""}
-              {selectedStages.length > 0
-                ? ` in ${selectedStages.length} lifecycle ${selectedStages.length === 1 ? "stage" : "stages"}`
-                : ""}
-              {selectedMetricTypes.length > 0
-                ? ` of ${selectedMetricTypes.length} metric ${selectedMetricTypes.length === 1 ? "type" : "types"}`
-                : ""}
-            </div>
+        <Tabs defaultValue="all" className="p-4">
+          <TabsList className="mb-4 bg-gray-100 p-1">
+            <TabsTrigger value="all" className="data-[state=active]:bg-white data-[state=active]:shadow-sm rounded-md">
+              All Metrics
+            </TabsTrigger>
+            <TabsTrigger
+              value="acquisition"
+              className="data-[state=active]:bg-white data-[state=active]:shadow-sm rounded-md"
+            >
+              Acquisition
+            </TabsTrigger>
+            <TabsTrigger
+              value="activation"
+              className="data-[state=active]:bg-white data-[state=active]:shadow-sm rounded-md"
+            >
+              Activation
+            </TabsTrigger>
+            <TabsTrigger
+              value="engagement"
+              className="data-[state=active]:bg-white data-[state=active]:shadow-sm rounded-md"
+            >
+              Engagement
+            </TabsTrigger>
+            <TabsTrigger
+              value="monetization"
+              className="data-[state=active]:bg-white data-[state=active]:shadow-sm rounded-md"
+            >
+              Monetization
+            </TabsTrigger>
+            <TabsTrigger
+              value="retention"
+              className="data-[state=active]:bg-white data-[state=active]:shadow-sm rounded-md"
+            >
+              Retention
+            </TabsTrigger>
+            <TabsTrigger
+              value="expansion"
+              className="data-[state=active]:bg-white data-[state=active]:shadow-sm rounded-md"
+            >
+              Expansion
+            </TabsTrigger>
+          </TabsList>
 
-            <div className="overflow-x-auto">
-              <table className="w-full">
-                <thead>
-                  <tr className="border-b border-gray-200 text-left">
-                    <th className="px-4 py-3 text-gray-500 font-medium text-sm">
-                      <div className="flex items-center cursor-pointer hover:text-gray-900">
-                        Name
-                        <ArrowUpDown className="ml-1 h-4 w-4" />
-                      </div>
-                    </th>
-                    <th className="px-4 py-3 text-gray-500 font-medium text-sm">
-                      <div className="flex items-center cursor-pointer hover:text-gray-900">
-                        Lifecycle Stage
-                        <ArrowUpDown className="ml-1 h-4 w-4" />
-                      </div>
-                    </th>
-                    <th className="px-4 py-3 text-gray-500 font-medium text-sm">
-                      <div className="flex items-center cursor-pointer hover:text-gray-900">
-                        Value
-                        <ArrowUpDown className="ml-1 h-4 w-4" />
-                      </div>
-                    </th>
-                    <th className="px-4 py-3 text-gray-500 font-medium text-sm">
-                      <div className="flex items-center cursor-pointer hover:text-gray-900">
-                        Count
-                        <ArrowUpDown className="ml-1 h-4 w-4" />
-                      </div>
-                    </th>
-                    <th className="px-4 py-3 text-gray-500 font-medium text-sm">
-                      <div className="flex items-center cursor-pointer hover:text-gray-900">Trend (12 months)</div>
-                    </th>
-                    <th className="px-4 py-3 text-gray-500 font-medium text-sm">
-                      <div className="flex items-center cursor-pointer hover:text-gray-900">
-                        Tactics
-                        <ArrowUpDown className="ml-1 h-4 w-4" />
-                      </div>
-                    </th>
-                  </tr>
-                </thead>
-                <tbody>
-                  {filteredGoals.map((goal) => {
-                    const relatedCampaigns = campaigns.filter((campaign) => campaign.goalIds.includes(goal.id))
-                    const activeCampaigns = relatedCampaigns.filter((c) => c.status === "active")
-                    const chartColors = getCategoryColors(goal.category)
+          <TabsContent value="all" className="mt-0">
+            {viewMode === "grid" ? (
+              <div className="grid grid-cols-1 md:grid-cols-2 lg:grid-cols-3 gap-4">
+                {filteredGoals.map((goal) => (
+                  <ConversionGoalCard
+                    key={goal.id}
+                    goal={goal}
+                    onSelect={onGoalSelect}
+                    onAddTactic={() => openAddTacticPanel(goal.id)}
+                  />
+                ))}
+              </div>
+            ) : (
+              <div className="overflow-x-auto">
+                <Table>
+                  <TableHeader>
+                    <TableRow className="bg-gray-50 hover:bg-gray-50">
+                      <TableHead className="w-[300px] cursor-pointer" onClick={() => handleSort("name")}>
+                        <div className="flex items-center">
+                          Name
+                          {sortBy === "name" && (
+                            <ChevronDown
+                              className={`ml-1 h-4 w-4 transition-transform ${sortOrder === "asc" ? "rotate-180" : ""}`}
+                            />
+                          )}
+                        </div>
+                      </TableHead>
+                      <TableHead>Lifecycle Stage</TableHead>
+                      <TableHead className="text-right cursor-pointer" onClick={() => handleSort("conversions")}>
+                        <div className="flex items-center justify-end">
+                          Count
+                          {sortBy === "conversions" && (
+                            <ChevronDown
+                              className={`ml-1 h-4 w-4 transition-transform ${sortOrder === "asc" ? "rotate-180" : ""}`}
+                            />
+                          )}
+                        </div>
+                      </TableHead>
+                      <TableHead className="text-right cursor-pointer" onClick={() => handleSort("value")}>
+                        <div className="flex items-center justify-end">
+                          Value
+                          {sortBy === "value" && (
+                            <ChevronDown
+                              className={`ml-1 h-4 w-4 transition-transform ${sortOrder === "asc" ? "rotate-180" : ""}`}
+                            />
+                          )}
+                        </div>
+                      </TableHead>
+                      <TableHead className="text-right cursor-pointer" onClick={() => handleSort("trend")}>
+                        <div className="flex items-center justify-end">
+                          Trend
+                          {sortBy === "trend" && (
+                            <ChevronDown
+                              className={`ml-1 h-4 w-4 transition-transform ${sortOrder === "asc" ? "rotate-180" : ""}`}
+                            />
+                          )}
+                        </div>
+                      </TableHead>
+                      <TableHead className="text-right">Tactics</TableHead>
+                      <TableHead className="w-[100px]">Actions</TableHead>
+                    </TableRow>
+                  </TableHeader>
+                  <TableBody>
+                    {filteredGoals.map((goal) => {
+                      const relatedCampaigns = getCampaignsForGoal(goal.id)
+                      const chartColors = getCategoryColors(goal.category)
 
-                    return (
-                      <tr
+                      return (
+                        <TableRow
+                          key={goal.id}
+                          className="cursor-pointer hover:bg-gray-50 transition-colors"
+                          onClick={() => onGoalSelect(goal.id)}
+                        >
+                          <TableCell className="font-medium">
+                            <div className="flex items-center gap-2">
+                              {goal.metricType && (
+                                <div className="flex-shrink-0">
+                                  <TooltipProvider>
+                                    <Tooltip>
+                                      <TooltipTrigger asChild>
+                                        <div
+                                          className={`flex items-center justify-center w-6 h-6 rounded-full ${
+                                            goal.metricType === "outcome" ? "bg-blue-50" : "bg-purple-50"
+                                          }`}
+                                        >
+                                          {goal.metricType === "outcome" ? (
+                                            <Star className="h-3.5 w-3.5 text-blue-600" />
+                                          ) : (
+                                            <Sparkles className="h-3.5 w-3.5 text-purple-600" />
+                                          )}
+                                        </div>
+                                      </TooltipTrigger>
+                                      <TooltipContent>
+                                        <p>{goal.metricType === "outcome" ? "Outcome Metric" : "Aha Moment Metric"}</p>
+                                      </TooltipContent>
+                                    </Tooltip>
+                                  </TooltipProvider>
+                                </div>
+                              )}
+                              <div>
+                                <div className="font-medium text-gray-900">{goal.name}</div>
+                                <div className="text-xs text-gray-500 max-w-xs truncate">{goal.description}</div>
+                              </div>
+                            </div>
+                          </TableCell>
+                          <TableCell>
+                            <Badge className={`font-normal ${getLifecycleStageBadgeClass(goal.category)}`}>
+                              {goal.category.charAt(0).toUpperCase() + goal.category.slice(1)}
+                            </Badge>
+                          </TableCell>
+                          <TableCell className="text-right">
+                            <div className="font-medium text-gray-900">{goal.conversions.toLocaleString()}</div>
+                            <div className="text-xs text-gray-500">Target: {goal.target.toLocaleString()}</div>
+                          </TableCell>
+                          <TableCell className="text-right">
+                            <div className="font-medium text-gray-900">${goal.value.toLocaleString()}</div>
+                            <div className={`text-xs ${goal.trend >= 0 ? "text-green-600" : "text-red-600"}`}>
+                              {goal.trend >= 0 ? "+" : ""}
+                              {goal.trend}%
+                            </div>
+                          </TableCell>
+                          <TableCell className="text-right">
+                            {goal.trendData ? (
+                              <TrendChart
+                                data={goal.trendData}
+                                height={40}
+                                width={120}
+                                lineColor={chartColors.line}
+                                fillColor={chartColors.fill}
+                                className="mx-auto"
+                              />
+                            ) : (
+                              <div className="h-10 w-30 bg-gray-100 rounded animate-pulse"></div>
+                            )}
+                          </TableCell>
+                          <TableCell className="text-right">
+                            <TooltipProvider>
+                              <Tooltip>
+                                <TooltipTrigger asChild>
+                                  <div className="inline-flex items-center justify-end">
+                                    <BarChart3 className="h-4 w-4 mr-1 text-gray-500" />
+                                    <span>{relatedCampaigns.length}</span>
+                                  </div>
+                                </TooltipTrigger>
+                                <TooltipContent align="end" className="w-80 p-0 overflow-hidden rounded-lg">
+                                  <div className="bg-gray-50 px-4 py-2 border-b">
+                                    <p className="font-medium">Associated Tactics</p>
+                                  </div>
+                                  <div className="p-4 max-h-[300px] overflow-auto">
+                                    {relatedCampaigns.length > 0 ? (
+                                      <div className="space-y-3">
+                                        {relatedCampaigns.map((campaign) => (
+                                          <div key={campaign.id} className="flex items-start gap-3">
+                                            <span
+                                              className={`inline-block w-2 h-2 rounded-full mt-1.5 ${
+                                                campaign.status === "active"
+                                                  ? "bg-green-500"
+                                                  : campaign.status === "paused"
+                                                    ? "bg-amber-500"
+                                                    : "bg-gray-400"
+                                              }`}
+                                            ></span>
+                                            <div className="flex-1">
+                                              <div className="font-medium text-sm">{campaign.name}</div>
+                                              <div className="text-xs text-gray-500 mt-0.5">
+                                                {campaign.channel.charAt(0).toUpperCase() + campaign.channel.slice(1)} •{" "}
+                                                {campaign.audience}
+                                              </div>
+                                            </div>
+                                            <div className="text-right text-xs">
+                                              <div className="font-medium">{campaign.conversions.toLocaleString()}</div>
+                                              <div className="text-gray-500">${campaign.value.toLocaleString()}</div>
+                                            </div>
+                                          </div>
+                                        ))}
+                                      </div>
+                                    ) : (
+                                      <div className="text-sm text-gray-500 text-center py-4">
+                                        No tactics associated with this metric
+                                      </div>
+                                    )}
+                                  </div>
+                                </TooltipContent>
+                              </Tooltip>
+                            </TooltipProvider>
+                          </TableCell>
+                          <TableCell>
+                            <Button
+                              variant="outline"
+                              size="sm"
+                              className="w-full text-blue-600 border-blue-200 hover:bg-blue-50"
+                              onClick={(e) => {
+                                e.stopPropagation()
+                                openAddTacticPanel(goal.id)
+                              }}
+                            >
+                              <Plus className="h-3 w-3 mr-1" />
+                              Add Tactic
+                            </Button>
+                          </TableCell>
+                        </TableRow>
+                      )
+                    })}
+                  </TableBody>
+                </Table>
+              </div>
+            )}
+          </TabsContent>
+
+          {["acquisition", "activation", "engagement", "monetization", "retention", "expansion"].map((category) => (
+            <TabsContent key={category} value={category} className="mt-0">
+              {/* Similar content as "all" tab, but filtered by category */}
+              {viewMode === "grid" ? (
+                <div className="grid grid-cols-1 md:grid-cols-2 lg:grid-cols-3 gap-4">
+                  {filteredGoals
+                    .filter((goal) => goal.category === category)
+                    .map((goal) => (
+                      <ConversionGoalCard
                         key={goal.id}
-                        className="border-b border-gray-200 hover:bg-gray-50 cursor-pointer"
-                        onClick={() => handleGoalClick(goal.id)}
-                      >
-                        <td className="px-4 py-3">
+                        goal={goal}
+                        onSelect={onGoalSelect}
+                        onAddTactic={() => openAddTacticPanel(goal.id)}
+                      />
+                    ))}
+                </div>
+              ) : (
+                <div className="overflow-x-auto">
+                  <Table>
+                    <TableHeader>
+                      <TableRow className="bg-gray-50 hover:bg-gray-50">
+                        <TableHead className="w-[300px] cursor-pointer" onClick={() => handleSort("name")}>
                           <div className="flex items-center">
-                            {/* Only show badge if the metric has a metricType */}
-                            {goal.metricType && (
-                              <div className="mr-2">
+                            Name
+                            {sortBy === "name" && (
+                              <ChevronDown
+                                className={`ml-1 h-4 w-4 transition-transform ${
+                                  sortOrder === "asc" ? "rotate-180" : ""
+                                }`}
+                              />
+                            )}
+                          </div>
+                        </TableHead>
+                        <TableHead>Lifecycle Stage</TableHead>
+                        <TableHead className="text-right cursor-pointer" onClick={() => handleSort("conversions")}>
+                          <div className="flex items-center justify-end">
+                            Count
+                            {sortBy === "conversions" && (
+                              <ChevronDown
+                                className={`ml-1 h-4 w-4 transition-transform ${
+                                  sortOrder === "asc" ? "rotate-180" : ""
+                                }`}
+                              />
+                            )}
+                          </div>
+                        </TableHead>
+                        <TableHead className="text-right cursor-pointer" onClick={() => handleSort("value")}>
+                          <div className="flex items-center justify-end">
+                            Value
+                            {sortBy === "value" && (
+                              <ChevronDown
+                                className={`ml-1 h-4 w-4 transition-transform ${
+                                  sortOrder === "asc" ? "rotate-180" : ""
+                                }`}
+                              />
+                            )}
+                          </div>
+                        </TableHead>
+                        <TableHead className="text-right cursor-pointer" onClick={() => handleSort("trend")}>
+                          <div className="flex items-center justify-end">
+                            Trend
+                            {sortBy === "trend" && (
+                              <ChevronDown
+                                className={`ml-1 h-4 w-4 transition-transform ${
+                                  sortOrder === "asc" ? "rotate-180" : ""
+                                }`}
+                              />
+                            )}
+                          </div>
+                        </TableHead>
+                        <TableHead className="text-right">Tactics</TableHead>
+                        <TableHead className="w-[100px]">Actions</TableHead>
+                      </TableRow>
+                    </TableHeader>
+                    <TableBody>
+                      {filteredGoals
+                        .filter((goal) => goal.category === category)
+                        .map((goal) => {
+                          const relatedCampaigns = getCampaignsForGoal(goal.id)
+                          const chartColors = getCategoryColors(goal.category)
+
+                          return (
+                            <TableRow
+                              key={goal.id}
+                              className="cursor-pointer hover:bg-gray-50 transition-colors"
+                              onClick={() => onGoalSelect(goal.id)}
+                            >
+                              <TableCell className="font-medium">
+                                <div className="flex items-center gap-2">
+                                  {goal.metricType && (
+                                    <div className="flex-shrink-0">
+                                      <TooltipProvider>
+                                        <Tooltip>
+                                          <TooltipTrigger asChild>
+                                            <div
+                                              className={`flex items-center justify-center w-6 h-6 rounded-full ${
+                                                goal.metricType === "outcome" ? "bg-blue-50" : "bg-purple-50"
+                                              }`}
+                                            >
+                                              {goal.metricType === "outcome" ? (
+                                                <Star className="h-3.5 w-3.5 text-blue-600" />
+                                              ) : (
+                                                <Sparkles className="h-3.5 w-3.5 text-purple-600" />
+                                              )}
+                                            </div>
+                                          </TooltipTrigger>
+                                          <TooltipContent>
+                                            <p>
+                                              {goal.metricType === "outcome" ? "Outcome Metric" : "Aha Moment Metric"}
+                                            </p>
+                                          </TooltipContent>
+                                        </Tooltip>
+                                      </TooltipProvider>
+                                    </div>
+                                  )}
+                                  <div>
+                                    <div className="font-medium text-gray-900">{goal.name}</div>
+                                    <div className="text-xs text-gray-500 max-w-xs truncate">{goal.description}</div>
+                                  </div>
+                                </div>
+                              </TableCell>
+                              <TableCell>
+                                <Badge className={`font-normal ${getLifecycleStageBadgeClass(goal.category)}`}>
+                                  {goal.category.charAt(0).toUpperCase() + goal.category.slice(1)}
+                                </Badge>
+                              </TableCell>
+                              <TableCell className="text-right">
+                                <div className="font-medium text-gray-900">{goal.conversions.toLocaleString()}</div>
+                                <div className="text-xs text-gray-500">Target: {goal.target.toLocaleString()}</div>
+                              </TableCell>
+                              <TableCell className="text-right">
+                                <div className="font-medium text-gray-900">${goal.value.toLocaleString()}</div>
+                                <div className={`text-xs ${goal.trend >= 0 ? "text-green-600" : "text-red-600"}`}>
+                                  {goal.trend >= 0 ? "+" : ""}
+                                  {goal.trend}%
+                                </div>
+                              </TableCell>
+                              <TableCell className="text-right">
+                                {goal.trendData ? (
+                                  <TrendChart
+                                    data={goal.trendData}
+                                    height={40}
+                                    width={120}
+                                    lineColor={chartColors.line}
+                                    fillColor={chartColors.fill}
+                                    className="mx-auto"
+                                  />
+                                ) : (
+                                  <div className="h-10 w-30 bg-gray-100 rounded animate-pulse"></div>
+                                )}
+                              </TableCell>
+                              <TableCell className="text-right">
                                 <TooltipProvider>
                                   <Tooltip>
                                     <TooltipTrigger asChild>
-                                      <div className="flex items-center justify-center w-6 h-6 rounded-full bg-gray-100">
-                                        {goal.metricType === "outcome" ? (
-                                          <DollarSign className="h-3.5 w-3.5 text-violet-600" />
-                                        ) : (
-                                          <AlertCircle className="h-3.5 w-3.5 text-emerald-600" />
-                                        )}
+                                      <div className="inline-flex items-center justify-end">
+                                        <BarChart3 className="h-4 w-4 mr-1 text-gray-500" />
+                                        <span>{relatedCampaigns.length}</span>
                                       </div>
                                     </TooltipTrigger>
-                                    <TooltipContent>
-                                      <p>{goal.metricType === "outcome" ? "Outcome Metric" : "Aha Moment"}</p>
+                                    <TooltipContent align="end" className="w-80 p-0 overflow-hidden rounded-lg">
+                                      <div className="bg-gray-50 px-4 py-2 border-b">
+                                        <p className="font-medium">Associated Tactics</p>
+                                      </div>
+                                      <div className="p-4 max-h-[300px] overflow-auto">
+                                        {relatedCampaigns.length > 0 ? (
+                                          <div className="space-y-3">
+                                            {relatedCampaigns.map((campaign) => (
+                                              <div key={campaign.id} className="flex items-start gap-3">
+                                                <span
+                                                  className={`inline-block w-2 h-2 rounded-full mt-1.5 ${
+                                                    campaign.status === "active"
+                                                      ? "bg-green-500"
+                                                      : campaign.status === "paused"
+                                                        ? "bg-amber-500"
+                                                        : "bg-gray-400"
+                                                  }`}
+                                                ></span>
+                                                <div className="flex-1">
+                                                  <div className="font-medium text-sm">{campaign.name}</div>
+                                                  <div className="text-xs text-gray-500 mt-0.5">
+                                                    {campaign.channel.charAt(0).toUpperCase() +
+                                                      campaign.channel.slice(1)}{" "}
+                                                    • {campaign.audience}
+                                                  </div>
+                                                </div>
+                                                <div className="text-right text-xs">
+                                                  <div className="font-medium">
+                                                    {campaign.conversions.toLocaleString()}
+                                                  </div>
+                                                  <div className="text-gray-500">
+                                                    ${campaign.value.toLocaleString()}
+                                                  </div>
+                                                </div>
+                                              </div>
+                                            ))}
+                                          </div>
+                                        ) : (
+                                          <div className="text-sm text-gray-500 text-center py-4">
+                                            No tactics associated with this metric
+                                          </div>
+                                        )}
+                                      </div>
                                     </TooltipContent>
                                   </Tooltip>
                                 </TooltipProvider>
-                              </div>
-                            )}
-                            <div>
-                              <div className="font-medium text-gray-900">{goal.name}</div>
-                              <div className="text-gray-500 text-sm truncate max-w-xs">{goal.description}</div>
-                            </div>
-                          </div>
-                        </td>
-                        <td className="px-4 py-3">
-                          <Badge className={`font-normal ${getLifecycleStageBadgeClass(goal.category)}`}>
-                            {goal.category.charAt(0).toUpperCase() + goal.category.slice(1)}
-                          </Badge>
-                        </td>
-                        <td className="px-4 py-3">
-                          <div className="font-medium text-gray-900">${goal.value.toLocaleString()}</div>
-                          <div className={`text-xs ${goal.trend >= 0 ? "text-green-600" : "text-red-600"}`}>
-                            {goal.trend >= 0 ? "+" : ""}
-                            {goal.trend}%
-                          </div>
-                        </td>
-                        <td className="px-4 py-3">
-                          <div className="font-medium text-gray-900">{goal.conversions.toLocaleString()}</div>
-                          <div className="text-gray-500 text-xs">Target: {goal.target.toLocaleString()}</div>
-                        </td>
-                        <td className="px-4 py-3">
-                          {goal.trendData ? (
-                            <TrendChart
-                              data={goal.trendData}
-                              height={40}
-                              width={120}
-                              lineColor={chartColors.line}
-                              fillColor={chartColors.fill}
-                              className="mx-auto"
-                            />
-                          ) : (
-                            <div className="h-10 w-30 bg-gray-100 rounded animate-pulse"></div>
-                          )}
-                        </td>
-                        <td className="px-4 py-3">
-                          <TooltipProvider>
-                            <Tooltip>
-                              <TooltipTrigger asChild>
-                                <div>
-                                  <div className="font-medium text-gray-900">{relatedCampaigns.length}</div>
-                                  <div className="text-gray-500 text-xs">{activeCampaigns.length} active</div>
-                                </div>
-                              </TooltipTrigger>
-                              <TooltipContent side="left" align="start" className="w-64 p-0">
-                                <div className="p-3 border-b border-gray-100">
-                                  <h3 className="font-medium text-sm">Associated Tactics</h3>
-                                </div>
-                                <div className="p-3 max-h-[300px] overflow-auto">
-                                  {relatedCampaigns.length > 0 ? (
-                                    <div className="space-y-2">
-                                      {relatedCampaigns.map((campaign) => (
-                                        <div key={campaign.id} className="flex items-start space-x-2">
-                                          <div
-                                            className={`w-2 h-2 mt-1.5 rounded-full ${
-                                              campaign.status === "active"
-                                                ? "bg-green-500"
-                                                : campaign.status === "paused"
-                                                  ? "bg-amber-500"
-                                                  : "bg-gray-400"
-                                            }`}
-                                          />
-                                          <div>
-                                            <div className="text-sm font-medium">{campaign.name}</div>
-                                            <div className="text-xs text-gray-500">
-                                              {campaign.channel.charAt(0).toUpperCase() + campaign.channel.slice(1)} •{" "}
-                                              {campaign.audience}
-                                            </div>
-                                          </div>
-                                        </div>
-                                      ))}
-                                    </div>
-                                  ) : (
-                                    <div className="text-sm text-gray-500">No tactics associated with this metric</div>
-                                  )}
-                                </div>
-                              </TooltipContent>
-                            </Tooltip>
-                          </TooltipProvider>
-                        </td>
-                      </tr>
-                    )
-                  })}
-                </tbody>
-              </table>
-            </div>
-          </div>
-        </div>
+                              </TableCell>
+                              <TableCell>
+                                <Button
+                                  variant="outline"
+                                  size="sm"
+                                  className="w-full text-blue-600 border-blue-200 hover:bg-blue-50"
+                                  onClick={(e) => {
+                                    e.stopPropagation()
+                                    openAddTacticPanel(goal.id)
+                                  }}
+                                >
+                                  <Plus className="h-3 w-3 mr-1" />
+                                  Add Tactic
+                                </Button>
+                              </TableCell>
+                            </TableRow>
+                          )
+                        })}
+                    </TableBody>
+                  </Table>
+                </div>
+              )}
+            </TabsContent>
+          ))}
+        </Tabs>
       </div>
-      <ConversionGoalSheet open={isCreatorOpen} onOpenChange={setIsCreatorOpen} />
+
+      {/* Add Tactic Side Panel */}
+      <Sheet open={isAddTacticOpen} onOpenChange={setIsAddTacticOpen}>
+        <SheetContent className="sm:max-w-md md:max-w-lg p-0 border-l">
+          <div className="flex flex-col h-full">
+            <div className="border-b p-6">
+              <h2 className="text-xl font-semibold">Add New Tactic</h2>
+              <p className="text-gray-500 mt-1">Create a new tactic to drive this metric</p>
+            </div>
+            <AddTacticForm goalId={selectedGoalId} onClose={() => setIsAddTacticOpen(false)} />
+          </div>
+        </SheetContent>
+      </Sheet>
     </div>
   )
 }

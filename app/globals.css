@@ -10,7 +10,7 @@
     --card-foreground: 222 47% 11%;
     --popover: 0 0% 100%;
     --popover-foreground: 222 47% 11%;
-    --primary: 215 100% 50%;
+    --primary: 262 59% 63%;
     --primary-foreground: 210 40% 98%;
     --secondary: 210 40% 96.1%;
     --secondary-foreground: 222 47% 11.2%;
@@ -22,7 +22,7 @@
     --destructive-foreground: 210 40% 98%;
     --border: 214.3 31.8% 91.4%;
     --input: 214.3 31.8% 91.4%;
-    --ring: 215 100% 50%;
+    --ring: 262 59% 63%;
     --radius: 0.375rem;
   }
 
@@ -33,7 +33,7 @@
     --card-foreground: 210 40% 98%;
     --popover: 222 47% 11%;
     --popover-foreground: 210 40% 98%;
-    --primary: 215 100% 50%;
+    --primary: 262 59% 63%;
     --primary-foreground: 210 40% 98%;
     --secondary: 217.2 32.6% 17.5%;
     --secondary-foreground: 210 40% 98%;
@@ -45,7 +45,7 @@
     --destructive-foreground: 210 40% 98%;
     --border: 217.2 32.6% 17.5%;
     --input: 217.2 32.6% 17.5%;
-    --ring: 215 100% 50%;
+    --ring: 262 59% 63%;
   }
 }
 
@@ -64,6 +64,12 @@
 }
 .category-activation {
   @apply bg-green-100 text-green-700;
+}
+.category-engagement {
+  @apply bg-indigo-100 text-indigo-700;
+}
+.category-monetization {
+  @apply bg-pink-100 text-pink-700;
 }
 .category-retention {
   @apply bg-purple-100 text-purple-700;
@@ -89,6 +95,12 @@
 }
 .progress-activation {
   @apply bg-green-500;
+}
+.progress-engagement {
+  @apply bg-indigo-500;
+}
+.progress-monetization {
+  @apply bg-pink-500;
 }
 .progress-retention {
   @apply bg-purple-500;
@@ -121,6 +133,14 @@
 
 .header-activation {
   @apply bg-gradient-to-r from-green-500 to-green-600;
+}
+
+.header-engagement {
+  @apply bg-gradient-to-r from-indigo-500 to-indigo-600;
+}
+
+.header-monetization {
+  @apply bg-gradient-to-r from-pink-500 to-pink-600;
 }
 
 .header-retention {

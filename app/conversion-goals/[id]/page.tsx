@@ -1,35 +1,32 @@
-import { notFound } from "next/navigation"
+"use client"
+
+import { useParams, useRouter } from "next/navigation"
+import { Button } from "@/components/ui/button"
+import { ArrowLeft } from "lucide-react"
+import Link from "next/link"
 import ConversionGoalDetail from "@/components/conversion-goal-detail"
-import { conversionGoals } from "@/lib/sample-data"
-import type { Metadata } from "next"
+import { DataProvider } from "@/lib/data-context"
+import { Toaster } from "@/components/ui/toaster"
 
-interface ConversionGoalPageProps {
-  params: {
-    id: string
-  }
-}
+export default function ConversionGoalDetailPage() {
+  const params = useParams()
+  const router = useRouter()
+  const goalId = params.id as string
 
-export async function generateMetadata({ params }: ConversionGoalPageProps): Promise<Metadata> {
-  const goal = conversionGoals.find((g) => g.id === params.id)
-
-  if (!goal) {
-    return {
-      title: "Goal Not Found | Customer.io",
-    }
-  }
-
-  return {
-    title: `${goal.name} | Conversion Goals | Customer.io`,
-    description: goal.description,
-  }
-}
-
-export default function ConversionGoalPage({ params }: ConversionGoalPageProps) {
-  const goal = conversionGoals.find((g) => g.id === params.id)
-
-  if (!goal) {
-    notFound()
-  }
-
-  return <ConversionGoalDetail goal={goal} />
+  return (
+    <DataProvider>
+      <main className="min-h-screen bg-gray-50">
+        <div className="container mx-auto pt-4">
+          <Link href="/goals">
+            <Button variant="ghost" className="mb-4 flex items-center gap-1">
+              <ArrowLeft className="h-4 w-4" />
+              Back to Metrics
+            </Button>
+          </Link>
+        </div>
+        <ConversionGoalDetail goalId={goalId} onBack={() => router.push("/goals")} />
+        <Toaster />
+      </main>
+    </DataProvider>
+  )
 }

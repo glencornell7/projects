@@ -18,31 +18,6 @@ function generateTrendData(baseValue: number, volatility: number, trend: number,
 export const conversionGoals: ConversionGoal[] = [
   // Acquisition metrics
   {
-    id: "goal1",
-    name: "Website Visitors",
-    description: "Count of unique visitors to the website in the last 30 days",
-    category: "acquisition",
-    value: 25000,
-    conversions: 25000,
-    target: 30000,
-    campaigns: 6,
-    trend: 15.7,
-    trendData: generateTrendData(20000, 0.1, 15.7, 12),
-    metricType: "outcome",
-  },
-  {
-    id: "goal2",
-    name: "Ad Clicks",
-    description: "Number of clicks on paid advertisements in the last 30 days",
-    category: "acquisition",
-    value: 35000,
-    conversions: 35000,
-    target: 40000,
-    campaigns: 4,
-    trend: -5.2,
-    trendData: generateTrendData(38000, 0.08, -5.2, 12),
-  },
-  {
     id: "goal3",
     name: "First Page View to Signup",
     description: "Users who sign up within 5 minutes of first page view",
@@ -67,6 +42,18 @@ export const conversionGoals: ConversionGoal[] = [
     trend: 12.3,
     trendData: generateTrendData(700, 0.09, 12.3, 12),
   },
+  {
+    id: "goal25",
+    name: "Email Signups",
+    description: "Number of users who sign up via email form",
+    category: "acquisition",
+    value: 32000,
+    conversions: 3200,
+    target: 4000,
+    campaigns: 3,
+    trend: 9.5,
+    trendData: generateTrendData(2800, 0.08, 9.5, 12),
+  },
 
   // Activation metrics
   {
@@ -80,7 +67,7 @@ export const conversionGoals: ConversionGoal[] = [
     campaigns: 5,
     trend: 12.5,
     trendData: generateTrendData(8500, 0.05, 12.5, 12),
-    metricType: "outcome",
+    // Removed outcome tag as it doesn't directly generate cash
   },
   {
     id: "goal6",
@@ -159,7 +146,7 @@ export const conversionGoals: ConversionGoal[] = [
     campaigns: 5,
     trend: 9.2,
     trendData: generateTrendData(7000, 0.06, 9.2, 12),
-    metricType: "outcome",
+    metricType: "outcome", // Directly generates revenue
   },
   {
     id: "goal12",
@@ -185,7 +172,7 @@ export const conversionGoals: ConversionGoal[] = [
     campaigns: 4,
     trend: 5.8,
     trendData: generateTrendData(55000, 0.04, 5.8, 12),
-    metricType: "outcome",
+    metricType: "outcome", // Directly represents cash generation
   },
   {
     id: "goal14",
@@ -198,6 +185,7 @@ export const conversionGoals: ConversionGoal[] = [
     campaigns: 3,
     trend: 7.4,
     trendData: generateTrendData(4500, 0.05, 7.4, 12),
+    metricType: "outcome", // Directly generates revenue
   },
   {
     id: "goal15",
@@ -224,7 +212,7 @@ export const conversionGoals: ConversionGoal[] = [
     campaigns: 4,
     trend: -2.1,
     trendData: generateTrendData(5100, 0.04, -2.1, 12),
-    metricType: "outcome",
+    metricType: "outcome", // Represents ongoing revenue
   },
   {
     id: "goal17",
@@ -276,7 +264,7 @@ export const conversionGoals: ConversionGoal[] = [
     campaigns: 3,
     trend: 8.3,
     trendData: generateTrendData(250, 0.08, 8.3, 12),
-    metricType: "outcome",
+    metricType: "outcome", // Directly generates additional revenue
   },
   {
     id: "goal21",
@@ -302,7 +290,7 @@ export const conversionGoals: ConversionGoal[] = [
     campaigns: 4,
     trend: 6.7,
     trendData: generateTrendData(700, 0.04, 6.7, 12),
-    metricType: "outcome",
+    metricType: "outcome", // Directly generates additional revenue
   },
   {
     id: "goal23",
@@ -315,6 +303,7 @@ export const conversionGoals: ConversionGoal[] = [
     campaigns: 3,
     trend: 9.4,
     trendData: generateTrendData(550, 0.06, 9.4, 12),
+    metricType: "outcome", // Directly represents additional revenue
   },
   {
     id: "goal24",
@@ -327,18 +316,7 @@ export const conversionGoals: ConversionGoal[] = [
     campaigns: 2,
     trend: 9.8,
     trendData: generateTrendData(180, 0.07, 9.8, 12),
-  },
-  {
-    id: "goal25",
-    name: "Seats Per Account Growth",
-    description: "Increase in the average number of seats per account",
-    category: "expansion",
-    value: 42000,
-    conversions: 420,
-    target: 500,
-    campaigns: 2,
-    trend: 7.8,
-    trendData: generateTrendData(350, 0.05, 7.8, 12),
+    metricType: "outcome", // Directly generates additional revenue
   },
 ]
 
@@ -351,7 +329,7 @@ export const campaigns: Campaign[] = [
     audience: "New Signups",
     created: "2023-05-15",
     modified: "2023-06-02",
-    goalIds: ["goal1", "goal4", "goal5"],
+    goalIds: ["goal4", "goal5", "goal25"],
     conversions: 450,
     value: 44550,
     metrics: {
@@ -368,7 +346,7 @@ export const campaigns: Campaign[] = [
     audience: "Trial Users (Day 12-14)",
     created: "2023-04-20",
     modified: "2023-05-18",
-    goalIds: ["goal1"],
+    goalIds: ["goal25"],
     conversions: 320,
     value: 31680,
     metrics: {
@@ -385,7 +363,7 @@ export const campaigns: Campaign[] = [
     audience: "Basic Plan Users (>30 days)",
     created: "2023-03-10",
     modified: "2023-04-05",
-    goalIds: ["goal2"],
+    goalIds: ["goal20"],
     conversions: 180,
     value: 27000,
     metrics: {
@@ -470,7 +448,7 @@ export const campaigns: Campaign[] = [
     audience: "All Active Users",
     created: "2023-04-15",
     modified: "2023-05-01",
-    goalIds: ["goal2", "goal6"],
+    goalIds: ["goal6", "goal24"],
     conversions: 150,
     value: 22500,
     metrics: {
